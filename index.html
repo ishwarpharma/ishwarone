@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -102,18 +103,20 @@
       document.getElementById('orderSection').style.display = 'block';
     }
 
-    // Load XLS and parse
-    fetch('stock.xls')
+    // Correct GitHub raw link to stock.xls
+    const XLS_URL = 'https://raw.githubusercontent.com/ishwarpharma/ishwarone/master/stock.xls';
+
+    fetch(XLS_URL)
       .then(response => response.arrayBuffer())
       .then(data => {
         const workbook = XLSX.read(data, { type: 'array' });
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-        jsonData.forEach((row, i) => {
-          if (i > 0 && row.length > 13) {
+        const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+        rows.forEach((row, index) => {
+          if (index > 0 && row.length >= 14) {
             products.push({
-              brand: row[1],
-              company: row[13],
+              brand: row[1] || '',
+              company: row[13] || '',
               rate: parseFloat(row[12]) || 0,
               mrp: parseFloat(row[10]) || 0
             });
