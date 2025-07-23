@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sales Order Form</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 10px;
+      background: #f0f8ff;
+      color: #333;
+    }
+    h2 {
+      color: #0066cc;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    .cart-item {
+      background: #e6f7ff;
+      padding: 10px;
+      margin-top: 10px;
+      border-left: 4px solid #0099cc;
+    }
+    .btn {
+      background: #0077cc;
+      color: white;
+      border: none;
+      margin-top: 10px;
+    }
+    .btn:hover {
+      background: #005fa3;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>📦 Sales Order Form</h2>
+
+  <label for="salesman">👤 Salesman Name:</label>
+  <input type="text" id="salesman" placeholder="Enter your name">
+
+  <label for="party">🏪 Party Name:</label>
+  <input type="text" id="party" placeholder="Enter party name">
+
+  <label for="district">📍 District:</label>
+  <input type="text" id="district" placeholder="Enter district">
+
+  <hr>
+
+  <label for="search">🔍 Search Product:</label>
+  <input type="text" id="search" placeholder="Enter brand and company keywords">
+  <select id="productDropdown"></select>
+
+  <label for="qty">🔢 Quantity:</label>
+  <input type="number" id="qty" min="1">
+
+  <label for="discount">💸 Discount %:</label>
+  <input type="number" id="discount" min="0" max="100">
+
+  <label for="splRate">⭐ Special Rate (if any):</label>
+  <input type="number" id="splRate">
+
+  <button class="btn" onclick="addToCart()">Add to Cart 🛒</button>
+
+  <div id="cart"></div>
+
+  <button class="btn" onclick="finalizeOrder()">📄 Finalize Order & Download PDF</button>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    let products = [];
+    let cart = [];
+
+    // Load product data from CSV exported from Excel
+    fetch('stock.csv') // Make sure you export Excel to CSV and rename as stock.csv
+      .then(response => response.text())
+      .then(data => {
+        const lines = data.split('\n');
+        lines.forEach((line, i) => {
+          if (i > 0) {
+            const parts = line.split(',');
+            if (parts.length > 13) {
+              products.push({
+                brand: parts[1],
+                company: parts[13],
+                rate: parseFloat(parts[12]) || 0,
+                mrp: parseFloat(parts[10]) || 0
+              });
+            }
+          }
+        });
+      });
+
+    document.getElementById('search').addEventListener('input', function () {
+      const keyword = this.value.toLowerCase();
+      const dropdown = document.getElementById('productDropdown');
+      dropdown.innerHTML = '';
+      products.filter(p => `${p.brand} ${p.company}`.toLowerCase().includes(keyword))
+        .forEach(p => {
+          const option = document.createElement('option');
+          option.value = `${p.brand} | ${p.company} | Rate: ₹${p.rate} | MRP: ₹${p.mrp}`;
+          option.dataset.brand = p.brand;
+          option.dataset.company = p.company;
+          option.dataset.rate = p.rate;
+          option.dataset.mrp = p.mrp;
+          dropdown.appendChild(option);
+        });
+    });
+
+    function addToCart() {
+      const selected = document.getElementById('productDropdown').selectedOptions[0];
+      if (!selected) return;
+      const qty = parseInt(document.getElementById('qty').value);
+      const discount = parseFloat(document.getElementById('discount').value) || 0;
+      const splRate = parseFloat(document.getElementById('splRate').value) || null;
+      if (!qty) return;
+
+      const item = {
+        brand: selected.dataset.brand,
+        company: selected.dataset.company,
+        qty,
+        rate: selected.dataset.rate,
+        discount,
+        splRate,
+        mrp: selected.dataset.mrp
+      };
+      cart.push(item);
+      displayCart();
+    }
+
+    function displayCart() {
+      const cartDiv = document.getElementById('cart');
+      cartDiv.innerHTML = '<h3>🛍️ Cart</h3>';
+      cart.forEach((item, index) => {
+        cartDiv.innerHTML += `<div class='cart-item'>${index + 1}. <strong>${item.brand}</strong> (${item.company}) - Qty: ${item.qty}, Rate: ₹${item.rate}, Disc: ${item.discount}%, Spl Rate: ₹${item.splRate || '-'} </div>`;
+      });
+    }
+
+    function finalizeOrder() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const salesman = document.getElementById('salesman').value;
+      const party = document.getElementById('party').value;
+      const district = document.getElementById('district').value;
+
+      doc.text(`Salesman: ${salesman}`, 10, 10);
+      doc.text(`Party: ${party}`, 10, 20);
+      doc.text(`District: ${district}`, 10, 30);
+
+      let y = 50;
+      cart.forEach((item, i) => {
+        const total = (item.splRate || item.rate) * item.qty;
+        doc.text(`${i + 1}) ${item.brand} (${item.company}) - Qty: ${item.qty}, Rate: ₹${item.rate}, Disc: ${item.discount}%, Spl Rate: ₹${item.splRate || '-'}, Total: ₹${total}`, 10, y);
+        y += 10;
+      });
+
+      doc.save(`${party}_Order.pdf`);
+    }
+  </script>
+</body>
+</html>
