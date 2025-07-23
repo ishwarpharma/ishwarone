@@ -11,7 +11,7 @@
       background: #f0f8ff;
       color: #333;
     }
-    h2 {
+    h2, h3 {
       color: #0066cc;
     }
     label {
@@ -41,63 +41,82 @@
     .btn:hover {
       background: #005fa3;
     }
+    #orderSection {
+      display: none;
+    }
   </style>
 </head>
 <body>
 
-  <h2>📦 Sales Order Form</h2>
+  <div id="startSection">
+    <h2>📦 Sales Order Form</h2>
 
-  <label for="salesman">👤 Salesman Name:</label>
-  <input type="text" id="salesman" placeholder="Enter your name">
+    <label for="salesman">👤 Salesman Name:</label>
+    <input type="text" id="salesman" placeholder="Enter your name">
 
-  <label for="party">🏪 Party Name:</label>
-  <input type="text" id="party" placeholder="Enter party name">
+    <label for="party">🏪 Party Name:</label>
+    <input type="text" id="party" placeholder="Enter party name">
 
-  <label for="district">📍 District:</label>
-  <input type="text" id="district" placeholder="Enter district">
+    <label for="district">📍 District:</label>
+    <input type="text" id="district" placeholder="Enter district">
 
-  <hr>
+    <button class="btn" onclick="startOrder()">Start Order ➡️</button>
+  </div>
 
-  <label for="search">🔍 Search Product:</label>
-  <input type="text" id="search" placeholder="Enter brand and company keywords">
-  <select id="productDropdown"></select>
+  <div id="orderSection">
+    <label for="search">🔍 Search Product:</label>
+    <input type="text" id="search" placeholder="Enter brand and company keywords">
+    <select id="productDropdown"></select>
 
-  <label for="qty">🔢 Quantity:</label>
-  <input type="number" id="qty" min="1">
+    <label for="qty">🔢 Quantity:</label>
+    <input type="number" id="qty" min="1">
 
-  <label for="discount">💸 Discount %:</label>
-  <input type="number" id="discount" min="0" max="100">
+    <label for="discount">💸 Discount %:</label>
+    <input type="number" id="discount" min="0" max="100">
 
-  <label for="splRate">⭐ Special Rate (if any):</label>
-  <input type="number" id="splRate">
+    <label for="splRate">⭐ Special Rate (if any):</label>
+    <input type="number" id="splRate">
 
-  <button class="btn" onclick="addToCart()">Add to Cart 🛒</button>
+    <button class="btn" onclick="addToCart()">Add to Cart 🛒</button>
 
-  <div id="cart"></div>
+    <div id="cart"></div>
 
-  <button class="btn" onclick="finalizeOrder()">📄 Finalize Order & Download PDF</button>
+    <button class="btn" onclick="finalizeOrder()">📄 Finalize Order & Download PDF</button>
+  </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
     let products = [];
     let cart = [];
 
-    // Load product data from CSV exported from Excel
-    fetch('stock.csv') // Make sure you export Excel to CSV and rename as stock.csv
-      .then(response => response.text())
+    function startOrder() {
+      const salesman = document.getElementById('salesman').value.trim();
+      const party = document.getElementById('party').value.trim();
+      const district = document.getElementById('district').value.trim();
+      if (!salesman || !party || !district) {
+        alert('Please fill all details');
+        return;
+      }
+      document.getElementById('startSection').style.display = 'none';
+      document.getElementById('orderSection').style.display = 'block';
+    }
+
+    // Load XLS and parse
+    fetch('stock.xls')
+      .then(response => response.arrayBuffer())
       .then(data => {
-        const lines = data.split('\n');
-        lines.forEach((line, i) => {
-          if (i > 0) {
-            const parts = line.split(',');
-            if (parts.length > 13) {
-              products.push({
-                brand: parts[1],
-                company: parts[13],
-                rate: parseFloat(parts[12]) || 0,
-                mrp: parseFloat(parts[10]) || 0
-              });
-            }
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+        jsonData.forEach((row, i) => {
+          if (i > 0 && row.length > 13) {
+            products.push({
+              brand: row[1],
+              company: row[13],
+              rate: parseFloat(row[12]) || 0,
+              mrp: parseFloat(row[10]) || 0
+            });
           }
         });
       });
@@ -109,7 +128,7 @@
       products.filter(p => `${p.brand} ${p.company}`.toLowerCase().includes(keyword))
         .forEach(p => {
           const option = document.createElement('option');
-          option.value = `${p.brand} | ${p.company} | Rate: ₹${p.rate} | MRP: ₹${p.mrp}`;
+          option.value = `${p.brand} | ${p.company} | ₹${p.rate} | MRP ₹${p.mrp}`;
           option.dataset.brand = p.brand;
           option.dataset.company = p.company;
           option.dataset.rate = p.rate;
@@ -161,7 +180,7 @@
       let y = 50;
       cart.forEach((item, i) => {
         const total = (item.splRate || item.rate) * item.qty;
-        doc.text(`${i + 1}) ${item.brand} (${item.company}) - Qty: ${item.qty}, Rate: ₹${item.rate}, Disc: ${item.discount}%, Spl Rate: ₹${item.splRate || '-'}, Total: ₹${total}`, 10, y);
+        doc.text(`${i + 1}) ${item.brand} (${item.company}) - Qty: ${item.qty}, Rate: ₹${item.rate}, Disc: ${item.discount}%, Spl Rate: ₹${item.splRate || '-'}, Total: ₹${total.toFixed(2)}`, 10, y);
         y += 10;
       });
 
