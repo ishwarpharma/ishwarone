@@ -1,163 +1,199 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sales Order Form</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ishwar Pharma Order Form</title>
   <style>
     body {
-      background-color: #eaf4fc;
-      padding: 20px;
+      font-family: Arial, sans-serif;
+      padding: 10px;
+      background: #f0f8ff;
+      color: #333;
     }
-    .form-section {
-      margin-bottom: 20px;
+    h2 {
+      color: #0066cc;
     }
-    .btn-primary {
+    input, button, select {
+      font-size: 1.1em;
+      padding: 10px;
+      margin: 10px 0;
       width: 100%;
+      box-sizing: border-box;
     }
-    .dropdown-item {
-      cursor: pointer;
+    .hidden {
+      display: none;
+    }
+    .product-item {
+      border: 1px solid #ccc;
+      margin-bottom: 5px;
+      padding: 10px;
+      background: #e6f7ff;
+    }
+    .cart-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    .cart-table th, .cart-table td {
+      border: 1px solid #999;
+      padding: 8px;
+      text-align: left;
+    }
+    .section {
+      margin-top: 20px;
     }
   </style>
 </head>
-
 <body>
-  <div class="container">
-    <h2 class="mb-4 text-center">📦 Sales Order Form</h2>
+  <div id="step1">
+    <h2>Ishwar Pharma Order Form</h2>
+    <label for="date">Date:</label>
+    <input type="text" id="date" readonly />
 
-    <div class="form-section">
-      <label for="salesman" class="form-label">👤 Salesman Name:</label>
-      <input type="text" id="salesman" class="form-control" placeholder="Enter Salesman Name">
-    </div>
+    <label for="salesman">Salesman Name:</label>
+    <input type="text" id="salesman" required />
 
-    <div class="form-section">
-      <label for="party" class="form-label">🏢 Party Name:</label>
-      <input type="text" id="party" class="form-control" placeholder="Enter Party Name">
-    </div>
+    <label for="party">Party Name:</label>
+    <input type="text" id="party" required />
 
-    <div class="form-section">
-      <label for="productSearch" class="form-label">🔍 Search Product:</label>
-      <input type="text" id="productSearch" class="form-control" placeholder="Start typing product name or 'name company'">
-      <ul id="productList" class="list-group"></ul>
-    </div>
+    <label for="place">Place/District:</label>
+    <input type="text" id="place" required />
 
-    <div id="productDetails" style="display:none;">
-      <div class="form-section">
-        <label for="quantity" class="form-label">🔢 Quantity:</label>
-        <input type="number" id="quantity" class="form-control" inputmode="numeric">
-      </div>
-
-      <div class="form-section">
-        <label for="discount" class="form-label">💸 Discount %:</label>
-        <input type="number" id="discount" class="form-control" inputmode="numeric">
-      </div>
-
-      <div class="form-section">
-        <label for="specialRate" class="form-label">⭐ Special Rate (if any):</label>
-        <input type="number" id="specialRate" class="form-control" inputmode="numeric">
-      </div>
-
-      <div class="form-section">
-        <label for="rate" class="form-label">💰 Normal Rate:</label>
-        <input type="text" id="rate" class="form-control" readonly>
-      </div>
-
-      <div class="form-section">
-        <label for="mrp" class="form-label">🏷️ MRP:</label>
-        <input type="text" id="mrp" class="form-control" readonly>
-      </div>
-
-      <button class="btn btn-primary mb-2" onclick="addToCart()">Add to Cart 🛒</button>
-    </div>
-
-    <button class="btn btn-primary" onclick="downloadPDF()">📄 Finalize Order & Download PDF</button>
-
-    <table class="table table-bordered mt-4">
-      <thead>
-        <tr>
-          <th>Product</th>
-          <th>Qty</th>
-          <th>Rate</th>
-          <th>Discount %</th>
-          <th>Special Rate</th>
-        </tr>
-      </thead>
-      <tbody id="orderTable"></tbody>
-    </table>
+    <button onclick="startOrder()">Start Order</button>
   </div>
 
-  <script>
-    let products = [];
-    let selectedProduct = null;
+  <div id="step2" class="hidden">
+    <div class="section">
+      <label for="search">Search Product (Brand Company):</label>
+      <input type="text" id="search" placeholder="Start typing..." oninput="searchProduct()" />
+      <div id="suggestions"></div>
+    </div>
 
-    async function fetchExcel() {
-      const response = await fetch('stock.xlsx');
-      const arrayBuffer = await response.arrayBuffer();
-      const data = new Uint8Array(arrayBuffer);
-      const workbook = XLSX.read(data, { type: 'array' });
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      const json = XLSX.utils.sheet_to_json(sheet);
-      products = json;
+    <div id="orderForm" class="section hidden">
+      <p><strong>Selected:</strong> <span id="selectedProduct"></span></p>
+      <label for="qty">Quantity:</label>
+      <input type="number" id="qty" inputmode="numeric" pattern="[0-9]*" />
+
+      <p>Rate: ₹<span id="rate"></span> | MRP: ₹<span id="mrp"></span></p>
+
+      <label for="discount">Discount %:</label>
+      <input type="number" id="discount" inputmode="numeric" pattern="[0-9]*" />
+
+      <label for="splrate">Special Rate (if any):</label>
+      <input type="number" id="splrate" inputmode="decimal" pattern="[0-9.]*" />
+
+      <button onclick="addToCart()">Add to Cart</button>
+    </div>
+
+    <div id="cart" class="section">
+      <h3>Cart</h3>
+      <table class="cart-table">
+        <thead>
+          <tr>
+            <th>Brand</th>
+            <th>Company</th>
+            <th>Qty</th>
+            <th>Rate</th>
+            <th>Discount</th>
+            <th>Spl Rate</th>
+          </tr>
+        </thead>
+        <tbody id="cartItems"></tbody>
+      </table>
+    </div>
+
+    <button onclick="finalizeOrder()">Finalize Order</button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script>
+    document.getElementById("date").value = new Date().toISOString().slice(0, 10);
+
+    let stockData = [];
+    let selectedItem = null;
+    let cart = [];
+
+    function startOrder() {
+      if (!document.getElementById("salesman").value || !document.getElementById("party").value) {
+        alert("Please enter Salesman and Party name.");
+        return;
+      }
+      document.getElementById("step1").classList.add("hidden");
+      document.getElementById("step2").classList.remove("hidden");
     }
 
-    fetchExcel();
-
-    $('#productSearch').on('input', function () {
-      const query = this.value.toLowerCase();
-      const filtered = products.filter(p => `${p.Product} ${p.Company}`.toLowerCase().includes(query));
-      const $list = $('#productList').empty();
-      filtered.forEach(item => {
-        $list.append(`<li class="list-group-item dropdown-item">${item.Product} - ${item.Company}</li>`);
+    fetch("stock.xlsx")
+      .then(res => res.arrayBuffer())
+      .then(ab => {
+        const wb = XLSX.read(ab, { type: "array" });
+        const sheet = wb.Sheets[wb.SheetNames[0]];
+        const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+        data.slice(1).forEach(row => {
+          stockData.push({
+            brand: row[1],
+            company: row[13],
+            rate: row[12],
+            mrp: row[10]
+          });
+        });
       });
-    });
 
-    $('#productList').on('click', 'li', function () {
-      const text = $(this).text();
-      $('#productSearch').val(text);
-      $('#productList').empty();
-      selectedProduct = products.find(p => `${p.Product} - ${p.Company}` === text);
-      if (selectedProduct) {
-        $('#rate').val(selectedProduct.Rate || '');
-        $('#mrp').val(selectedProduct.MRP || '');
-        $('#productDetails').show();
-      }
-    });
+    function searchProduct() {
+      const keyword = document.getElementById("search").value.toLowerCase();
+      const results = stockData.filter(item =>
+        (item.brand + " " + item.company).toLowerCase().includes(keyword)
+      ).slice(0, 10);
+
+      const suggestions = results.map(item =>
+        `<div class='product-item' onclick='selectProduct(${JSON.stringify(JSON.stringify(item))})'>
+          ${item.brand} | ${item.company} | ₹${item.rate} | MRP ₹${item.mrp}
+        </div>`
+      ).join("");
+      document.getElementById("suggestions").innerHTML = suggestions;
+    }
+
+    function selectProduct(jsonStr) {
+      selectedItem = JSON.parse(JSON.parse(jsonStr));
+      document.getElementById("selectedProduct").textContent = `${selectedItem.brand} - ${selectedItem.company}`;
+      document.getElementById("rate").textContent = selectedItem.rate;
+      document.getElementById("mrp").textContent = selectedItem.mrp;
+      document.getElementById("orderForm").classList.remove("hidden");
+    }
 
     function addToCart() {
-      const name = $('#productSearch').val();
-      const qty = $('#quantity').val();
-      const rate = $('#rate').val();
-      const discount = $('#discount').val();
-      const specialRate = $('#specialRate').val();
+      const qty = +document.getElementById("qty").value;
+      const discount = +document.getElementById("discount").value;
+      const splrate = +document.getElementById("splrate").value;
 
-      if (!qty) return alert('Enter quantity');
+      if (!qty) return alert("Enter quantity");
+      cart.push({
+        ...selectedItem,
+        qty,
+        discount,
+        splrate: splrate || "-"
+      });
 
-      $('#orderTable').append(`
-        <tr>
-          <td>${name}</td>
-          <td>${qty}</td>
-          <td>${rate}</td>
-          <td>${discount}</td>
-          <td>${specialRate}</td>
-        </tr>
-      `);
+      document.getElementById("cartItems").innerHTML = cart.map(item =>
+        `<tr>
+          <td>${item.brand}</td>
+          <td>${item.company}</td>
+          <td>${item.qty}</td>
+          <td>${item.rate}</td>
+          <td>${item.discount}</td>
+          <td>${item.splrate}</td>
+        </tr>`
+      ).join("");
 
-      $('#quantity').val('');
-      $('#discount').val('');
-      $('#specialRate').val('');
-      $('#productSearch').val('');
-      $('#productDetails').hide();
+      document.getElementById("orderForm").classList.add("hidden");
+      document.getElementById("search").value = "";
+      document.getElementById("suggestions").innerHTML = "";
     }
 
-    function downloadPDF() {
-      alert("Download PDF functionality to be added");
+    function finalizeOrder() {
+      alert("Final PDF generation coming next!");
+      // Generate PDF here (can integrate jsPDF in next step)
     }
   </script>
 </body>
-
 </html>
