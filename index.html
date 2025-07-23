@@ -4,191 +4,192 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ishwar Pharma Order Form</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.17.0/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://unpkg.com/whatsapp-web-api"></script>
+  <script src="https://cdn.jsdelivr.net/npm/emoji-picker-element"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <style>
-    body { background: #f7f7f7; font-family: 'Segoe UI', sans-serif; }
-    .container { max-width: 540px; margin-top: 2rem; }
-    .section { display: none; }
-    .visible { display: block; }
-    #search-results { max-height: 200px; overflow-y: auto; }
-    .cart-table td, .cart-table th { font-size: 0.9rem; padding: 4px; }
-    .delete-btn { cursor: pointer; color: red; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .hidden {
+      display: none;
+    }
+    .cart-row {
+      display: grid;
+      grid-template-columns: 1fr 3fr 1fr 1fr 1fr 1fr 1fr 1fr;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      border-bottom: 1px solid #ccc;
+      align-items: center;
+    }
+    .cart-header {
+      font-weight: bold;
+      background-color: #f3f4f6;
+    }
   </style>
 </head>
-<body>
-<div class="container">
-  <div id="welcome" class="section visible">
-    <h3 class="text-center mb-4">💊 Ishwar Pharma Order Form</h3>
-    <div class="mb-3">
-      <label class="form-label">Date</label>
-      <input type="text" id="order-date" class="form-control" readonly />
+<body class="bg-gray-100 p-4">
+  <div id="welcome-screen" class="text-center">
+    <h1 class="text-3xl font-bold mb-4">🧾 Ishwar Pharma Order Form</h1>
+    <div class="mb-4">
+      <label class="block text-gray-700">Date</label>
+      <input type="date" id="order-date" class="border p-2" value="" />
     </div>
-    <div class="mb-3">
-      <label class="form-label">Salesman Name</label>
-      <input type="text" id="salesman-name" class="form-control" required />
+    <div class="mb-4">
+      <label class="block text-gray-700">Salesman Name</label>
+      <input type="text" id="salesman" class="border p-2 w-full" placeholder="Enter salesman name" />
     </div>
-    <div class="mb-3">
-      <label class="form-label">Party Name</label>
-      <input type="text" id="party-name" class="form-control" required />
+    <div class="mb-4">
+      <label class="block text-gray-700">Party Name</label>
+      <input type="text" id="party" class="border p-2 w-full" placeholder="Enter party name" />
     </div>
-    <div class="mb-3">
-      <label class="form-label">Place/District</label>
-      <input type="text" id="district" class="form-control" required />
+    <div class="mb-4">
+      <label class="block text-gray-700">Place</label>
+      <input type="text" id="place" class="border p-2 w-full" placeholder="Enter place" />
     </div>
-    <button class="btn btn-primary w-100" onclick="startOrdering()">🚀 Start Ordering</button>
+    <button onclick="startOrder()" class="bg-green-500 text-white px-6 py-2 rounded">🚀 Start Ordering</button>
   </div>
 
-  <div id="ordering-section" class="section">
-    <h5>🛒 Add Products</h5>
-    <input type="text" id="product-search" class="form-control mb-2" placeholder="Search brand name & company name..." />
-    <ul id="search-results" class="list-group mb-3"></ul>
-
-    <div id="product-input-section" class="mb-3" style="display:none;">
-      <p><strong id="selected-product"></strong></p>
-      <p>💵 Rate: ₹<span id="selected-rate"></span> | 🏷️ MRP: ₹<span id="selected-mrp"></span></p>
-      <input type="number" inputmode="numeric" id="qty" class="form-control mb-2" placeholder="Qty" />
-      <input type="number" inputmode="numeric" id="disc" class="form-control mb-2" placeholder="Discount %" />
-      <input type="number" inputmode="numeric" id="spl-rate" class="form-control mb-2" placeholder="Special Rate (if any)" />
-      <button class="btn btn-success w-100" onclick="addToCart()">➕ Add to Cart</button>
+  <div id="order-section" class="hidden">
+    <div class="mb-4">
+      <label class="block text-gray-700">Search Product</label>
+      <input type="text" id="search" class="border p-2 w-full" placeholder="Type brand or 'brand company'" oninput="searchProduct()" />
+      <ul id="search-results" class="bg-white shadow-md max-h-40 overflow-auto"></ul>
     </div>
 
-    <hr />
-    <h5>🧾 Your Cart</h5>
-    <table class="table table-bordered cart-table">
-      <thead>
-        <tr>
-          <th>#</th><th>Product</th><th>Qty</th><th>Rate</th><th>Disc%</th><th>Spl Rate</th><th>Amt</th><th></th>
-        </tr>
-      </thead>
-      <tbody id="cart-body"></tbody>
-    </table>
-    <p class="text-end fw-bold">Total: ₹<span id="grand-total">0</span></p>
-    <button class="btn btn-dark w-100" onclick="downloadPDF()">📄 Finalise & Download Order</button>
+    <div id="product-entry" class="hidden mb-4">
+      <h2 class="text-xl font-bold mb-2">📦 Product Entry</h2>
+      <p id="selected-product-info" class="mb-2 text-gray-700"></p>
+      <label>Qty</label>
+      <input type="number" id="qty" class="border p-2 mb-2 w-full" inputmode="numeric" />
+      <label>Discount %</label>
+      <input type="number" id="discount" class="border p-2 mb-2 w-full" inputmode="numeric" />
+      <label>Special Rate</label>
+      <input type="number" id="splrate" class="border p-2 mb-2 w-full" inputmode="numeric" />
+      <button onclick="addToCart()" class="bg-blue-500 text-white px-4 py-2 rounded">➕ Add to Cart</button>
+    </div>
+
+    <div class="mt-6">
+      <h2 class="text-xl font-bold">🛒 Cart</h2>
+      <div id="cart" class="bg-white p-4 shadow-md mt-2"></div>
+      <button onclick="finalizeOrder()" class="mt-4 bg-purple-600 text-white px-4 py-2 rounded">📤 Finalize & Download PDF</button>
+    </div>
   </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script>
-  const products = [];
-  const cart = [];
-  let selectedItem = {};
+  <script>
+    let stockData = [];
+    let cart = [];
+    let selectedProduct = null;
 
-  document.getElementById("order-date").value = new Date().toISOString().split('T')[0];
+    document.getElementById('order-date').valueAsDate = new Date();
 
-  async function fetchData() {
-    const url = "https://ishwarpharma.github.io/ishwarone/stock.xlsx";
-    const response = await fetch(url);
-    const arrayBuffer = await response.arrayBuffer();
-    const workbook = XLSX.read(arrayBuffer, { type: "array" });
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const json = XLSX.utils.sheet_to_json(sheet);
-    products.push(...json);
-  }
-
-  fetchData();
-
-  function startOrdering() {
-    if (!document.getElementById('salesman-name').value || !document.getElementById('party-name').value || !document.getElementById('district').value) {
-      alert("Please fill in all details"); return;
+    async function loadStock() {
+      const res = await fetch('stock.xlsx');
+      const ab = await res.arrayBuffer();
+      const wb = XLSX.read(ab, { type: 'array' });
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      stockData = XLSX.utils.sheet_to_json(sheet);
     }
-    document.getElementById("welcome").classList.remove("visible");
-    document.getElementById("ordering-section").classList.add("visible");
-  }
 
-  document.getElementById("product-search").addEventListener("input", function () {
-    const val = this.value.toLowerCase().split(" ");
-    const [brandKey, companyKey] = val;
-    const matches = products.filter(p =>
-      (!brandKey || (p["__EMPTY_1"] || "").toLowerCase().includes(brandKey)) &&
-      (!companyKey || (p["__EMPTY_13"] || "").toLowerCase().includes(companyKey))
-    );
-    const resultsList = document.getElementById("search-results");
-    resultsList.innerHTML = "";
-    matches.slice(0, 20).forEach(p => {
-      const li = document.createElement("li");
-      li.className = "list-group-item list-group-item-action";
-      li.textContent = `${p["__EMPTY_1"]} | ${p["__EMPTY_13"]} | ₹${p["__EMPTY_12"]} | MRP ₹${p["__EMPTY_10"]}`;
-      li.onclick = () => showProductInput(p);
-      resultsList.appendChild(li);
-    });
-  });
+    function startOrder() {
+      document.getElementById('welcome-screen').classList.add('hidden');
+      document.getElementById('order-section').classList.remove('hidden');
+    }
 
-  function showProductInput(product) {
-    selectedItem = product;
-    document.getElementById("selected-product").textContent = `${product["__EMPTY_1"]} (${product["__EMPTY_13"]})`;
-    document.getElementById("selected-rate").textContent = product["__EMPTY_12"];
-    document.getElementById("selected-mrp").textContent = product["__EMPTY_10"];
-    document.getElementById("product-input-section").style.display = "block";
-    document.getElementById("product-search").value = "";
-    document.getElementById("search-results").innerHTML = "";
-  }
+    function searchProduct() {
+      const query = document.getElementById('search').value.toLowerCase().split(' ');
+      const [brand, company] = query;
+      const results = stockData.filter(item =>
+        item.Brand?.toLowerCase().includes(brand || '') &&
+        item.Company?.toLowerCase().includes(company || brand || '')
+      );
+      const resultList = document.getElementById('search-results');
+      resultList.innerHTML = '';
+      results.forEach(r => {
+        const li = document.createElement('li');
+        li.textContent = `${r.Brand} (${r.Company})`;
+        li.className = 'p-2 cursor-pointer hover:bg-gray-200';
+        li.onclick = () => selectProduct(r);
+        resultList.appendChild(li);
+      });
+    }
 
-  function addToCart() {
-    const qty = parseFloat(document.getElementById("qty").value) || 0;
-    const disc = parseFloat(document.getElementById("disc").value) || 0;
-    const splRate = parseFloat(document.getElementById("spl-rate").value) || 0;
-    const rate = parseFloat(selectedItem["__EMPTY_12"]);
-    const effectiveRate = splRate || rate * (1 - disc / 100);
-    const amt = qty * effectiveRate;
-    cart.push({
-      name: selectedItem["__EMPTY_1"],
-      company: selectedItem["__EMPTY_13"],
-      rate, mrp: selectedItem["__EMPTY_10"],
-      qty, disc, splRate, amt: amt.toFixed(2)
-    });
-    document.getElementById("product-input-section").style.display = "none";
-    document.getElementById("qty").value = "";
-    document.getElementById("disc").value = "";
-    document.getElementById("spl-rate").value = "";
-    renderCart();
-  }
+    function selectProduct(p) {
+      selectedProduct = p;
+      document.getElementById('search').value = '';
+      document.getElementById('search-results').innerHTML = '';
+      document.getElementById('selected-product-info').innerHTML = `Brand: <strong>${p.Brand}</strong>, Company: <strong>${p.Company}</strong><br>Rate: ₹${p.Rate} | MRP: ₹${p.MRP}`;
+      document.getElementById('product-entry').classList.remove('hidden');
+    }
 
-  function renderCart() {
-    const body = document.getElementById("cart-body");
-    body.innerHTML = "";
-    let total = 0;
-    cart.forEach((item, i) => {
-      total += parseFloat(item.amt);
-      body.innerHTML += `<tr><td>${i + 1}</td><td>${item.name}<br><small>${item.company}</small></td><td>${item.qty}</td><td>${item.rate}</td><td>${item.disc}</td><td>${item.splRate || "-"}</td><td>${item.amt}</td><td><span class='delete-btn' onclick='deleteItem(${i})'>❌</span></td></tr>`;
-    });
-    document.getElementById("grand-total").textContent = total.toFixed(2);
-  }
+    function addToCart() {
+      const qty = parseFloat(document.getElementById('qty').value);
+      const disc = parseFloat(document.getElementById('discount').value);
+      const spl = parseFloat(document.getElementById('splrate').value);
+      if (!selectedProduct || isNaN(qty)) return alert('Incomplete details');
+      const amt = qty * (spl || selectedProduct.Rate) * (1 - (disc || 0) / 100);
+      cart.push({ ...selectedProduct, qty, disc, spl, amt });
+      document.getElementById('product-entry').classList.add('hidden');
+      document.getElementById('qty').value = document.getElementById('discount').value = document.getElementById('splrate').value = '';
+      renderCart();
+    }
 
-  function deleteItem(i) {
-    cart.splice(i, 1);
-    renderCart();
-  }
+    function renderCart() {
+      const div = document.getElementById('cart');
+      div.innerHTML = '';
+      if (cart.length === 0) return (div.textContent = 'Cart is empty');
+      div.innerHTML = `
+        <div class="cart-row cart-header">
+          <div>#</div><div>Product</div><div>Qty</div><div>Rate</div><div>Spl</div><div>Disc%</div><div>Amt</div><div>Action</div>
+        </div>`;
+      cart.forEach((item, i) => {
+        div.innerHTML += `
+          <div class="cart-row">
+            <div>${i + 1}</div>
+            <div>${item.Brand} (${item.Company})</div>
+            <div>${item.qty}</div>
+            <div>${item.Rate}</div>
+            <div>${item.spl || '-'}</div>
+            <div>${item.disc || '-'}</div>
+            <div>₹${item.amt.toFixed(2)}</div>
+            <div><button onclick="removeItem(${i})" class="text-red-500">❌</button></div>
+          </div>`;
+      });
+    }
 
-  async function downloadPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    const date = document.getElementById("order-date").value;
-    const sales = document.getElementById("salesman-name").value;
-    const party = document.getElementById("party-name").value;
-    const district = document.getElementById("district").value;
-    let y = 10;
-    doc.setFontSize(12);
-    doc.text("🧾 Ishwar Pharma Order Summary", 10, y);
-    y += 8;
-    doc.text(`Date: ${date}`, 10, y);
-    doc.text(`Salesman: ${sales}`, 100, y);
-    y += 7;
-    doc.text(`Party: ${party} (${district})`, 10, y);
-    y += 8;
+    function removeItem(index) {
+      cart.splice(index, 1);
+      renderCart();
+    }
 
-    doc.setFontSize(10);
-    doc.text("S.No  Product  Company  Qty  Rate  Disc%  SplRate  Amount", 10, y);
-    y += 5;
-    cart.forEach((item, i) => {
-      doc.text(`${i + 1}  ${item.name}  ${item.company}  ${item.qty}  ${item.rate}  ${item.disc}  ${item.splRate || "-"}  ${item.amt}`, 10, y);
+    function finalizeOrder() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      let y = 10;
+      doc.text(`Ishwar Pharma Order`, 10, y);
+      y += 10;
+      doc.text(`Date: ${document.getElementById('order-date').value}`, 10, y);
       y += 6;
-    });
-    y += 5;
-    doc.setFontSize(12);
-    doc.text(`Grand Total: ₹${document.getElementById("grand-total").textContent}`, 10, y);
-    doc.save(`Order_${party}_${date}.pdf`);
-  }
-</script>
+      doc.text(`Salesman: ${document.getElementById('salesman').value}`, 10, y);
+      y += 6;
+      doc.text(`Party: ${document.getElementById('party').value}, Place: ${document.getElementById('place').value}`, 10, y);
+      y += 10;
+      doc.text('SNo  Item  Qty  Rate  Spl  Disc%  Amt', 10, y);
+      y += 6;
+      cart.forEach((item, i) => {
+        doc.text(`${i + 1}. ${item.Brand} - ${item.qty} - ₹${item.Rate} - ₹${item.spl || '-'} - ${item.disc || 0}% - ₹${item.amt.toFixed(2)}`, 10, y);
+        y += 6;
+      });
+      const total = cart.reduce((t, i) => t + i.amt, 0);
+      doc.text(`Grand Total: ₹${total.toFixed(2)}`, 10, y + 6);
+      doc.save('order.pdf');
+    }
+
+    loadStock();
+  </script>
 </body>
 </html>
