@@ -1,93 +1,163 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sales Order Form</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; background: #e8f4fd; padding: 20px; }
-    label { display: block; margin: 15px 0 5px; font-weight: bold; }
-    input, select, button { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; }
-    button { background: #007bff; color: white; border: none; cursor: pointer; margin-top: 20px; }
-    button:hover { background: #0056b3; }
-    .autocomplete-items { border: 1px solid #ccc; max-height: 150px; overflow-y: auto; background: white; position: absolute; z-index: 9999; width: calc(100% - 22px); }
-    .autocomplete-items div { padding: 10px; cursor: pointer; }
-    .autocomplete-items div:hover { background-color: #e9e9e9; }
-    .autocomplete { position: relative; display: block; }
+    body {
+      background-color: #eaf4fc;
+      padding: 20px;
+    }
+    .form-section {
+      margin-bottom: 20px;
+    }
+    .btn-primary {
+      width: 100%;
+    }
+    .dropdown-item {
+      cursor: pointer;
+    }
   </style>
 </head>
+
 <body>
+  <div class="container">
+    <h2 class="mb-4 text-center">📦 Sales Order Form</h2>
 
-<h2>🛒 Search Product:</h2>
-<div class="autocomplete">
-  <input type="text" id="searchInput" placeholder="Type product or company name...">
-  <div id="autocompleteList" class="autocomplete-items"></div>
-</div>
+    <div class="form-section">
+      <label for="salesman" class="form-label">👤 Salesman Name:</label>
+      <input type="text" id="salesman" class="form-control" placeholder="Enter Salesman Name">
+    </div>
 
-<label>🔢 Quantity:</label>
-<input type="number" id="quantity">
+    <div class="form-section">
+      <label for="party" class="form-label">🏢 Party Name:</label>
+      <input type="text" id="party" class="form-control" placeholder="Enter Party Name">
+    </div>
 
-<label>💸 Discount %:</label>
-<input type="number" id="discount">
+    <div class="form-section">
+      <label for="productSearch" class="form-label">🔍 Search Product:</label>
+      <input type="text" id="productSearch" class="form-control" placeholder="Start typing product name or 'name company'">
+      <ul id="productList" class="list-group"></ul>
+    </div>
 
-<label>⭐ Special Rate (if any):</label>
-<input type="text" id="specialRate">
+    <div id="productDetails" style="display:none;">
+      <div class="form-section">
+        <label for="quantity" class="form-label">🔢 Quantity:</label>
+        <input type="number" id="quantity" class="form-control" inputmode="numeric">
+      </div>
 
-<button onclick="addToCart()">Add to Cart 🛒</button>
-<button onclick="finalizeOrder()">📄 Finalize Order & Download PDF</button>
+      <div class="form-section">
+        <label for="discount" class="form-label">💸 Discount %:</label>
+        <input type="number" id="discount" class="form-control" inputmode="numeric">
+      </div>
 
-<script>
-let products = []
+      <div class="form-section">
+        <label for="specialRate" class="form-label">⭐ Special Rate (if any):</label>
+        <input type="number" id="specialRate" class="form-control" inputmode="numeric">
+      </div>
 
-// Load stock.xlsx and extract product info
-fetch("stock.xlsx")
-  .then(res => res.arrayBuffer())
-  .then(ab => {
-    const wb = XLSX.read(ab, { type: "array" });
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    const json = XLSX.utils.sheet_to_json(ws);
-    products = json.map(row => ({
-      name: row["Product Name"],
-      company: row["Company"],
-      rate: row["Rate"],
-      stock: row["Stock"]
-    }));
-  });
+      <div class="form-section">
+        <label for="rate" class="form-label">💰 Normal Rate:</label>
+        <input type="text" id="rate" class="form-control" readonly>
+      </div>
 
-const searchInput = document.getElementById("searchInput");
-const autocompleteList = document.getElementById("autocompleteList");
+      <div class="form-section">
+        <label for="mrp" class="form-label">🏷️ MRP:</label>
+        <input type="text" id="mrp" class="form-control" readonly>
+      </div>
 
-searchInput.addEventListener("input", function () {
-  const val = this.value.toLowerCase();
-  autocompleteList.innerHTML = "";
-  if (val.length < 3) return;
+      <button class="btn btn-primary mb-2" onclick="addToCart()">Add to Cart 🛒</button>
+    </div>
 
-  const filtered = products.filter(p =>
-    (p.name && p.name.toLowerCase().includes(val)) ||
-    (p.company && p.company.toLowerCase().includes(val))
-  ).slice(0, 20);
+    <button class="btn btn-primary" onclick="downloadPDF()">📄 Finalize Order & Download PDF</button>
 
-  filtered.forEach(p => {
-    const div = document.createElement("div");
-    div.innerHTML = `<strong>${p.name}</strong> <small>(${p.company})</small>`;
-    div.onclick = () => {
-      searchInput.value = p.name;
-      autocompleteList.innerHTML = "";
-    };
-    autocompleteList.appendChild(div);
-  });
-});
+    <table class="table table-bordered mt-4">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Qty</th>
+          <th>Rate</th>
+          <th>Discount %</th>
+          <th>Special Rate</th>
+        </tr>
+      </thead>
+      <tbody id="orderTable"></tbody>
+    </table>
+  </div>
 
-function addToCart() {
-  alert("Product added to cart! [This part can be enhanced further]");
-}
+  <script>
+    let products = [];
+    let selectedProduct = null;
 
-function finalizeOrder() {
-  alert("PDF generated! [This part can be integrated with jsPDF]");
-}
-</script>
+    async function fetchExcel() {
+      const response = await fetch('stock.xlsx');
+      const arrayBuffer = await response.arrayBuffer();
+      const data = new Uint8Array(arrayBuffer);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const json = XLSX.utils.sheet_to_json(sheet);
+      products = json;
+    }
 
+    fetchExcel();
+
+    $('#productSearch').on('input', function () {
+      const query = this.value.toLowerCase();
+      const filtered = products.filter(p => `${p.Product} ${p.Company}`.toLowerCase().includes(query));
+      const $list = $('#productList').empty();
+      filtered.forEach(item => {
+        $list.append(`<li class="list-group-item dropdown-item">${item.Product} - ${item.Company}</li>`);
+      });
+    });
+
+    $('#productList').on('click', 'li', function () {
+      const text = $(this).text();
+      $('#productSearch').val(text);
+      $('#productList').empty();
+      selectedProduct = products.find(p => `${p.Product} - ${p.Company}` === text);
+      if (selectedProduct) {
+        $('#rate').val(selectedProduct.Rate || '');
+        $('#mrp').val(selectedProduct.MRP || '');
+        $('#productDetails').show();
+      }
+    });
+
+    function addToCart() {
+      const name = $('#productSearch').val();
+      const qty = $('#quantity').val();
+      const rate = $('#rate').val();
+      const discount = $('#discount').val();
+      const specialRate = $('#specialRate').val();
+
+      if (!qty) return alert('Enter quantity');
+
+      $('#orderTable').append(`
+        <tr>
+          <td>${name}</td>
+          <td>${qty}</td>
+          <td>${rate}</td>
+          <td>${discount}</td>
+          <td>${specialRate}</td>
+        </tr>
+      `);
+
+      $('#quantity').val('');
+      $('#discount').val('');
+      $('#specialRate').val('');
+      $('#productSearch').val('');
+      $('#productDetails').hide();
+    }
+
+    function downloadPDF() {
+      alert("Download PDF functionality to be added");
+    }
+  </script>
 </body>
+
 </html>
