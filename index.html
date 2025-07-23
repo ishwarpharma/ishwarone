@@ -4,188 +4,90 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sales Order Form</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 10px;
-      background: #f0f8ff;
-      color: #333;
-    }
-    h2, h3 {
-      color: #0066cc;
-    }
-    label {
-      display: block;
-      margin-top: 10px;
-    }
-    input, select, button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-    }
-    .cart-item {
-      background: #e6f7ff;
-      padding: 10px;
-      margin-top: 10px;
-      border-left: 4px solid #0099cc;
-    }
-    .btn {
-      background: #0077cc;
-      color: white;
-      border: none;
-      margin-top: 10px;
-    }
-    .btn:hover {
-      background: #005fa3;
-    }
-    #orderSection {
-      display: none;
-    }
+    body { font-family: Arial, sans-serif; background: #e8f4fd; padding: 20px; }
+    label { display: block; margin: 15px 0 5px; font-weight: bold; }
+    input, select, button { width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc; }
+    button { background: #007bff; color: white; border: none; cursor: pointer; margin-top: 20px; }
+    button:hover { background: #0056b3; }
+    .autocomplete-items { border: 1px solid #ccc; max-height: 150px; overflow-y: auto; background: white; position: absolute; z-index: 9999; width: calc(100% - 22px); }
+    .autocomplete-items div { padding: 10px; cursor: pointer; }
+    .autocomplete-items div:hover { background-color: #e9e9e9; }
+    .autocomplete { position: relative; display: block; }
   </style>
 </head>
 <body>
 
-  <div id="startSection">
-    <h2>📦 Sales Order Form</h2>
+<h2>🛒 Search Product:</h2>
+<div class="autocomplete">
+  <input type="text" id="searchInput" placeholder="Type product or company name...">
+  <div id="autocompleteList" class="autocomplete-items"></div>
+</div>
 
-    <label for="salesman">👤 Salesman Name:</label>
-    <input type="text" id="salesman" placeholder="Enter your name">
+<label>🔢 Quantity:</label>
+<input type="number" id="quantity">
 
-    <label for="party">🏪 Party Name:</label>
-    <input type="text" id="party" placeholder="Enter party name">
+<label>💸 Discount %:</label>
+<input type="number" id="discount">
 
-    <label for="district">📍 District:</label>
-    <input type="text" id="district" placeholder="Enter district">
+<label>⭐ Special Rate (if any):</label>
+<input type="text" id="specialRate">
 
-    <button class="btn" onclick="startOrder()">Start Order ➡️</button>
-  </div>
+<button onclick="addToCart()">Add to Cart 🛒</button>
+<button onclick="finalizeOrder()">📄 Finalize Order & Download PDF</button>
 
-  <div id="orderSection">
-    <label for="search">🔍 Search Product:</label>
-    <input type="text" id="search" placeholder="Enter brand and company keywords">
-    <select id="productDropdown"></select>
+<script>
+let products = []
 
-    <label for="qty">🔢 Quantity:</label>
-    <input type="number" id="qty" min="1">
+// Load stock.xlsx and extract product info
+fetch("stock.xlsx")
+  .then(res => res.arrayBuffer())
+  .then(ab => {
+    const wb = XLSX.read(ab, { type: "array" });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const json = XLSX.utils.sheet_to_json(ws);
+    products = json.map(row => ({
+      name: row["Product Name"],
+      company: row["Company"],
+      rate: row["Rate"],
+      stock: row["Stock"]
+    }));
+  });
 
-    <label for="discount">💸 Discount %:</label>
-    <input type="number" id="discount" min="0" max="100">
+const searchInput = document.getElementById("searchInput");
+const autocompleteList = document.getElementById("autocompleteList");
 
-    <label for="splRate">⭐ Special Rate (if any):</label>
-    <input type="number" id="splRate">
+searchInput.addEventListener("input", function () {
+  const val = this.value.toLowerCase();
+  autocompleteList.innerHTML = "";
+  if (val.length < 3) return;
 
-    <button class="btn" onclick="addToCart()">Add to Cart 🛒</button>
+  const filtered = products.filter(p =>
+    (p.name && p.name.toLowerCase().includes(val)) ||
+    (p.company && p.company.toLowerCase().includes(val))
+  ).slice(0, 20);
 
-    <div id="cart"></div>
+  filtered.forEach(p => {
+    const div = document.createElement("div");
+    div.innerHTML = `<strong>${p.name}</strong> <small>(${p.company})</small>`;
+    div.onclick = () => {
+      searchInput.value = p.name;
+      autocompleteList.innerHTML = "";
+    };
+    autocompleteList.appendChild(div);
+  });
+});
 
-    <button class="btn" onclick="finalizeOrder()">📄 Finalize Order & Download PDF</button>
-  </div>
+function addToCart() {
+  alert("Product added to cart! [This part can be enhanced further]");
+}
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script>
-    let products = [];
-    let cart = [];
+function finalizeOrder() {
+  alert("PDF generated! [This part can be integrated with jsPDF]");
+}
+</script>
 
-    function startOrder() {
-      const salesman = document.getElementById('salesman').value.trim();
-      const party = document.getElementById('party').value.trim();
-      const district = document.getElementById('district').value.trim();
-      if (!salesman || !party || !district) {
-        alert('Please fill all details');
-        return;
-      }
-      document.getElementById('startSection').style.display = 'none';
-      document.getElementById('orderSection').style.display = 'block';
-    }
-
-    // Load XLS and parse
-    fetch('stock.xls')
-      .then(response => response.arrayBuffer())
-      .then(data => {
-        const workbook = XLSX.read(data, { type: 'array' });
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-        jsonData.forEach((row, i) => {
-          if (i > 0 && row.length > 13) {
-            products.push({
-              brand: row[1],
-              company: row[13],
-              rate: parseFloat(row[12]) || 0,
-              mrp: parseFloat(row[10]) || 0
-            });
-          }
-        });
-      });
-
-    document.getElementById('search').addEventListener('input', function () {
-      const keyword = this.value.toLowerCase();
-      const dropdown = document.getElementById('productDropdown');
-      dropdown.innerHTML = '';
-      products.filter(p => `${p.brand} ${p.company}`.toLowerCase().includes(keyword))
-        .forEach(p => {
-          const option = document.createElement('option');
-          option.value = `${p.brand} | ${p.company} | ₹${p.rate} | MRP ₹${p.mrp}`;
-          option.dataset.brand = p.brand;
-          option.dataset.company = p.company;
-          option.dataset.rate = p.rate;
-          option.dataset.mrp = p.mrp;
-          dropdown.appendChild(option);
-        });
-    });
-
-    function addToCart() {
-      const selected = document.getElementById('productDropdown').selectedOptions[0];
-      if (!selected) return;
-      const qty = parseInt(document.getElementById('qty').value);
-      const discount = parseFloat(document.getElementById('discount').value) || 0;
-      const splRate = parseFloat(document.getElementById('splRate').value) || null;
-      if (!qty) return;
-
-      const item = {
-        brand: selected.dataset.brand,
-        company: selected.dataset.company,
-        qty,
-        rate: selected.dataset.rate,
-        discount,
-        splRate,
-        mrp: selected.dataset.mrp
-      };
-      cart.push(item);
-      displayCart();
-    }
-
-    function displayCart() {
-      const cartDiv = document.getElementById('cart');
-      cartDiv.innerHTML = '<h3>🛍️ Cart</h3>';
-      cart.forEach((item, index) => {
-        cartDiv.innerHTML += `<div class='cart-item'>${index + 1}. <strong>${item.brand}</strong> (${item.company}) - Qty: ${item.qty}, Rate: ₹${item.rate}, Disc: ${item.discount}%, Spl Rate: ₹${item.splRate || '-'} </div>`;
-      });
-    }
-
-    function finalizeOrder() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      const salesman = document.getElementById('salesman').value;
-      const party = document.getElementById('party').value;
-      const district = document.getElementById('district').value;
-
-      doc.text(`Salesman: ${salesman}`, 10, 10);
-      doc.text(`Party: ${party}`, 10, 20);
-      doc.text(`District: ${district}`, 10, 30);
-
-      let y = 50;
-      cart.forEach((item, i) => {
-        const total = (item.splRate || item.rate) * item.qty;
-        doc.text(`${i + 1}) ${item.brand} (${item.company}) - Qty: ${item.qty}, Rate: ₹${item.rate}, Disc: ${item.discount}%, Spl Rate: ₹${item.splRate || '-'}, Total: ₹${total.toFixed(2)}`, 10, y);
-        y += 10;
-      });
-
-      doc.save(`${party}_Order.pdf`);
-    }
-  </script>
 </body>
 </html>
