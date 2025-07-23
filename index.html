@@ -1,199 +1,165 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ishwar Pharma Order Form</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: sans-serif;
+      background: #f7f7f7;
+      margin: 0;
       padding: 10px;
-      background: #f0f8ff;
-      color: #333;
     }
-    h2 {
-      color: #0066cc;
-    }
-    input, button, select {
-      font-size: 1.1em;
-      padding: 10px;
-      margin: 10px 0;
-      width: 100%;
-      box-sizing: border-box;
+    .container {
+      max-width: 480px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
     .hidden {
       display: none;
     }
-    .product-item {
-      border: 1px solid #ccc;
-      margin-bottom: 5px;
-      padding: 10px;
-      background: #e6f7ff;
-    }
-    .cart-table {
+    input, button, select {
       width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
+      padding: 10px;
+      margin: 8px 0;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
     }
-    .cart-table th, .cart-table td {
-      border: 1px solid #999;
+    button {
+      background-color: #1976d2;
+      color: white;
+      font-weight: bold;
+    }
+    .item-card {
       padding: 8px;
-      text-align: left;
+      border-bottom: 1px solid #ddd;
     }
-    .section {
-      margin-top: 20px;
+    .cart-items {
+      background: #eef6ff;
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 6px;
+    }
+    .cart-items h4 {
+      margin: 0 0 10px;
     }
   </style>
 </head>
 <body>
-  <div id="step1">
+  <div class="container" id="step1">
     <h2>Ishwar Pharma Order Form</h2>
-    <label for="date">Date:</label>
-    <input type="text" id="date" readonly />
-
-    <label for="salesman">Salesman Name:</label>
-    <input type="text" id="salesman" required />
-
-    <label for="party">Party Name:</label>
-    <input type="text" id="party" required />
-
-    <label for="place">Place/District:</label>
-    <input type="text" id="place" required />
-
-    <button onclick="startOrder()">Start Order</button>
+    <p>Date: <span id="today"></span></p>
+    <input type="text" id="salesman" placeholder="Enter Salesman Name" required>
+    <input type="text" id="party" placeholder="Enter Party Name" required>
+    <input type="text" id="place" placeholder="Enter Place / District" required>
+    <button onclick="goToOrder()">Start Order</button>
   </div>
 
-  <div id="step2" class="hidden">
-    <div class="section">
-      <label for="search">Search Product (Brand Company):</label>
-      <input type="text" id="search" placeholder="Start typing..." oninput="searchProduct()" />
-      <div id="suggestions"></div>
-    </div>
+  <div class="container hidden" id="step2">
+    <input type="text" id="productSearch" placeholder="Search Brand Company..." oninput="searchProducts()">
+    <div id="productDropdown"></div>
 
-    <div id="orderForm" class="section hidden">
-      <p><strong>Selected:</strong> <span id="selectedProduct"></span></p>
-      <label for="qty">Quantity:</label>
-      <input type="number" id="qty" inputmode="numeric" pattern="[0-9]*" />
-
-      <p>Rate: ₹<span id="rate"></span> | MRP: ₹<span id="mrp"></span></p>
-
-      <label for="discount">Discount %:</label>
-      <input type="number" id="discount" inputmode="numeric" pattern="[0-9]*" />
-
-      <label for="splrate">Special Rate (if any):</label>
-      <input type="number" id="splrate" inputmode="decimal" pattern="[0-9.]*" />
-
+    <div id="productDetails" class="hidden">
+      <p><b>Rate:</b> ₹<span id="rateDisplay"></span> | <b>MRP:</b> ₹<span id="mrpDisplay"></span></p>
+      <input type="number" id="qty" placeholder="Qty" inputmode="numeric">
+      <input type="number" id="discount" placeholder="Discount %" inputmode="numeric">
+      <input type="number" id="specialRate" placeholder="Special Rate (if any)" inputmode="numeric">
       <button onclick="addToCart()">Add to Cart</button>
     </div>
 
-    <div id="cart" class="section">
-      <h3>Cart</h3>
-      <table class="cart-table">
-        <thead>
-          <tr>
-            <th>Brand</th>
-            <th>Company</th>
-            <th>Qty</th>
-            <th>Rate</th>
-            <th>Discount</th>
-            <th>Spl Rate</th>
-          </tr>
-        </thead>
-        <tbody id="cartItems"></tbody>
-      </table>
+    <div class="cart-items">
+      <h4>Cart</h4>
+      <ul id="cartList"></ul>
     </div>
-
-    <button onclick="finalizeOrder()">Finalize Order</button>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <script>
-    document.getElementById("date").value = new Date().toISOString().slice(0, 10);
+<script>
+  document.getElementById("today").innerText = new Date().toLocaleDateString();
+  let productList = [];
+  let selectedItem = null;
+  let cart = [];
 
-    let stockData = [];
-    let selectedItem = null;
-    let cart = [];
+  function goToOrder() {
+    if (!document.getElementById("salesman").value || !document.getElementById("party").value) return alert("Fill all fields");
+    document.getElementById("step1").classList.add("hidden");
+    document.getElementById("step2").classList.remove("hidden");
+    loadStock();
+  }
 
-    function startOrder() {
-      if (!document.getElementById("salesman").value || !document.getElementById("party").value) {
-        alert("Please enter Salesman and Party name.");
-        return;
+  async function loadStock() {
+    const res = await fetch("stock.xlsx");
+    const ab = await res.arrayBuffer();
+    const wb = XLSX.read(ab, { type: "array" });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const json = XLSX.utils.sheet_to_json(ws, { header: 1 });
+
+    json.forEach((row, i) => {
+      if (i === 0) return;
+      const brand = row[1], company = row[13], rate = row[12], mrp = row[10];
+      if (brand && company && rate && mrp) {
+        productList.push({ brand, company, rate, mrp });
       }
-      document.getElementById("step1").classList.add("hidden");
-      document.getElementById("step2").classList.remove("hidden");
-    }
+    });
+  }
 
-    fetch("stock.xlsx")
-      .then(res => res.arrayBuffer())
-      .then(ab => {
-        const wb = XLSX.read(ab, { type: "array" });
-        const sheet = wb.Sheets[wb.SheetNames[0]];
-        const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-        data.slice(1).forEach(row => {
-          stockData.push({
-            brand: row[1],
-            company: row[13],
-            rate: row[12],
-            mrp: row[10]
-          });
-        });
-      });
+  function searchProducts() {
+    const q = document.getElementById("productSearch").value.toLowerCase();
+    const filtered = productList.filter(p => (`${p.brand} ${p.company}`.toLowerCase().includes(q)));
+    const dropdown = document.getElementById("productDropdown");
+    dropdown.innerHTML = "";
+    filtered.slice(0, 10).forEach(p => {
+      const btn = document.createElement("button");
+      btn.innerText = `${p.brand} | ${p.company} | ₹${p.rate} | MRP ₹${p.mrp}`;
+      btn.onclick = () => selectProduct(p);
+      dropdown.appendChild(btn);
+    });
+  }
 
-    function searchProduct() {
-      const keyword = document.getElementById("search").value.toLowerCase();
-      const results = stockData.filter(item =>
-        (item.brand + " " + item.company).toLowerCase().includes(keyword)
-      ).slice(0, 10);
+  function selectProduct(p) {
+    selectedItem = p;
+    document.getElementById("rateDisplay").innerText = p.rate;
+    document.getElementById("mrpDisplay").innerText = p.mrp;
+    document.getElementById("productDetails").classList.remove("hidden");
+    document.getElementById("qty").focus();
+  }
 
-      const suggestions = results.map(item =>
-        `<div class='product-item' onclick='selectProduct(${JSON.stringify(JSON.stringify(item))})'>
-          ${item.brand} | ${item.company} | ₹${item.rate} | MRP ₹${item.mrp}
-        </div>`
-      ).join("");
-      document.getElementById("suggestions").innerHTML = suggestions;
-    }
+  function addToCart() {
+    const qty = parseInt(document.getElementById("qty").value);
+    const disc = parseFloat(document.getElementById("discount").value || 0);
+    const spl = parseFloat(document.getElementById("specialRate").value || selectedItem.rate);
+    if (!qty || !selectedItem) return alert("Fill quantity");
+    const item = {
+      ...selectedItem,
+      qty,
+      disc,
+      spl,
+      total: (spl * qty).toFixed(2)
+    };
+    cart.push(item);
+    renderCart();
+    document.getElementById("productDetails").classList.add("hidden");
+    document.getElementById("qty").value = "";
+    document.getElementById("discount").value = "";
+    document.getElementById("specialRate").value = "";
+    document.getElementById("productSearch").value = "";
+    document.getElementById("productDropdown").innerHTML = "";
+  }
 
-    function selectProduct(jsonStr) {
-      selectedItem = JSON.parse(JSON.parse(jsonStr));
-      document.getElementById("selectedProduct").textContent = `${selectedItem.brand} - ${selectedItem.company}`;
-      document.getElementById("rate").textContent = selectedItem.rate;
-      document.getElementById("mrp").textContent = selectedItem.mrp;
-      document.getElementById("orderForm").classList.remove("hidden");
-    }
-
-    function addToCart() {
-      const qty = +document.getElementById("qty").value;
-      const discount = +document.getElementById("discount").value;
-      const splrate = +document.getElementById("splrate").value;
-
-      if (!qty) return alert("Enter quantity");
-      cart.push({
-        ...selectedItem,
-        qty,
-        discount,
-        splrate: splrate || "-"
-      });
-
-      document.getElementById("cartItems").innerHTML = cart.map(item =>
-        `<tr>
-          <td>${item.brand}</td>
-          <td>${item.company}</td>
-          <td>${item.qty}</td>
-          <td>${item.rate}</td>
-          <td>${item.discount}</td>
-          <td>${item.splrate}</td>
-        </tr>`
-      ).join("");
-
-      document.getElementById("orderForm").classList.add("hidden");
-      document.getElementById("search").value = "";
-      document.getElementById("suggestions").innerHTML = "";
-    }
-
-    function finalizeOrder() {
-      alert("Final PDF generation coming next!");
-      // Generate PDF here (can integrate jsPDF in next step)
-    }
-  </script>
+  function renderCart() {
+    const list = document.getElementById("cartList");
+    list.innerHTML = "";
+    cart.forEach(item => {
+      const li = document.createElement("li");
+      li.innerText = `${item.brand} | ${item.company} | Qty: ${item.qty} | ₹${item.spl} | Disc: ${item.disc}% | Total: ₹${item.total}`;
+      list.appendChild(li);
+    });
+  }
+</script>
 </body>
 </html>
