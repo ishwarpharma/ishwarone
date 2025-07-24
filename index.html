@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ishwar Pharma Order Form</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -78,6 +79,8 @@
       <input type="text" id="party" />
       <label>Place/District:</label>
       <input type="text" id="place" />
+      <label>📦 Load Excel Stock File:</label>
+      <input type="file" id="excelFile" accept=".xlsx" onchange="loadExcelFile(event)" />
       <button onclick="nextScreen()">🚀 Start Ordering</button>
     </div>
 
@@ -114,31 +117,48 @@
       </table>
 
       <div class="action-buttons">
-        <button onclick="finalizeOrder()">✅ Finalize & Download PDF</button>
+        <button onclick="finalizeOrder()">✅ Finalize & Download</button>
         <button onclick="resetOrder()">🔄 Reset</button>
       </div>
     </div>
   </main>
 
   <script>
-    let products = [
-      { name: "URODIV", company: "Ishwar", rate: 52, mrp: 98 },
-      { name: "ZERODER SP", company: "Ishwar", rate: 18, mrp: 35 },
-      { name: "ZERODER MR", company: "Ishwar", rate: 14, mrp: 27 },
-      { name: "VITAMIN C", company: "ABC", rate: 10, mrp: 20 },
-      { name: "PARACETAMOL", company: "XYZ", rate: 8, mrp: 15 }
-    ];
-
+    let products = [];
     let cart = [];
     let selectedProduct = null;
 
     window.onload = function () {
-      const dateField = document.getElementById("date");
-      const today = new Date().toISOString().slice(0, 10);
-      dateField.value = today;
+      document.getElementById("date").value = new Date().toISOString().slice(0, 10);
     };
 
+    function loadExcelFile(event) {
+      const file = event.target.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json(sheet);
+        
+        products = json.map(row => ({
+          name: row["Product"],
+          company: row["Company"],
+          rate: parseFloat(row["Rate"]),
+          mrp: parseFloat(row["MRP"])
+        }));
+        alert("✅ Stock loaded successfully from Excel!");
+      };
+
+      reader.readAsArrayBuffer(file);
+    }
+
     function nextScreen() {
+      if (products.length === 0) {
+        alert("⚠️ Please load the Excel file before proceeding!");
+        return;
+      }
       document.getElementById("screen1").classList.remove("active");
       document.getElementById("screen2").classList.add("active");
     }
@@ -163,6 +183,10 @@
       matches.forEach((product, index) => {
         const div = document.createElement("div");
         div.textContent = `${product.name} (${product.company})`;
+        div.style.cursor = "pointer";
+        div.style.padding = "5px";
+        div.style.background = "#e3f2fd";
+        div.style.marginBottom = "5px";
         div.onclick = () => selectProduct(product);
         resultsDiv.appendChild(div);
       });
@@ -233,12 +257,6 @@
 
     function finalizeOrder() {
       let content = `Date: ${document.getElementById("date").value}\nSalesman: ${document.getElementById("salesman").value}\nParty: ${document.getElementById("party").value}\nPlace: ${document.getElementById("place").value}\n\n`;
-      content += "S.No\tProduct\tQty\tRate\tSpl Rate\tDisc%\tAmount\n";
-
-      cart.forEach((item, index) => {
-        content += `${index + 1}\t${item.name}\t${item.qty}\t${item.rate}\t${item.splRate}\t${item.disc}\t${item.amount.toFixed(2)}\n`;
-      });
-
       const total = cart.reduce((sum, item) => sum + item.amount, 0);
       content += `\nGrand Total: ₹${total.toFixed(2)}`;
 
