@@ -230,36 +230,74 @@
       renderCart();
     }
 
-    async function finalizeOrder() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      let y = 10;
-      doc.text("Ishwar Pharma Order", 10, y);
-      y += 10;
-      doc.text(`Date: ${document.getElementById("date").value}`, 10, y);
-      y += 10;
-      doc.text(`Salesman: ${document.getElementById("salesman").value}`, 10, y);
-      y += 10;
-      doc.text(`Party: ${document.getElementById("party").value}`, 10, y);
-      y += 10;
-      doc.text(`Place: ${document.getElementById("place").value}`, 10, y);
-      y += 10;
+async function finalizeOrder() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  let y = 10;
 
-      let total = 0;
-      cart.forEach((item, i) => {
-        const amt = (item.splRate || item.rate) * item.qty * (1 - (item.disc || 0) / 100);
-        total += amt;
-        doc.text(`${i + 1}. ${item.brand} ${item.company} | Qty: ${item.qty} | Rate: ₹${item.rate} | Spl: ₹${item.splRate || "-"} | Disc: ${item.disc || 0}% | Amt: ₹${amt.toFixed(2)}`, 10, y);
-        y += 10;
-        if (y > 270) {
-          doc.addPage();
-          y = 10;
-        }
-      });
-      y += 10;
-      doc.text(`Total Amount: ₹${total.toFixed(2)}`, 10, y);
-      doc.save("order.pdf");
+  // Header
+  doc.setFontSize(16);
+  doc.setTextColor(40, 40, 200);
+  doc.text("🧾 Ishwar Pharma - Purchase Order", pageWidth / 2, y, { align: "center" });
+  y += 10;
+
+  // Party details
+  doc.setFontSize(12);
+  doc.setTextColor(0, 0, 0);
+  doc.text(`📅 Date: ${document.getElementById("date").value}`, 10, y);
+  y += 7;
+  doc.text(`🧑 Salesman: ${document.getElementById("salesman").value}`, 10, y);
+  y += 7;
+  doc.text(`🏬 Party: ${document.getElementById("party").value}`, 10, y);
+  y += 7;
+  doc.text(`📍 Place: ${document.getElementById("place").value}`, 10, y);
+  y += 10;
+
+  // Table Headers
+  doc.setFillColor(220, 220, 250);
+  doc.rect(10, y, pageWidth - 20, 10, 'F');
+  doc.setFont(undefined, 'bold');
+  doc.text("Sr", 12, y + 7);
+  doc.text("Brand", 20, y + 7);
+  doc.text("Company", 60, y + 7);
+  doc.text("Qty", 100, y + 7);
+  doc.text("Rate", 115, y + 7);
+  doc.text("Spl", 135, y + 7);
+  doc.text("Disc%", 150, y + 7);
+  doc.text("Amt", 170, y + 7);
+  y += 12;
+  doc.setFont(undefined, 'normal');
+
+  // Table rows
+  let total = 0;
+  cart.forEach((item, i) => {
+    const rateToUse = item.splRate || item.rate;
+    const amt = rateToUse * item.qty * (1 - (item.disc || 0) / 100);
+    total += amt;
+
+    if (y > 270) {
+      doc.addPage();
+      y = 10;
     }
+
+    doc.text(`${i + 1}`, 12, y);
+    doc.text(`${item.brand}`, 20, y);
+    doc.text(`${item.company}`, 60, y);
+    doc.text(`${item.qty}`, 100, y);
+    doc.text(`₹${item.rate}`, 115, y);
+    doc.text(`₹${item.splRate || "-"}`, 135, y);
+    doc.text(`${item.disc || 0}%`, 150, y);
+    doc.text(`₹${amt.toFixed(2)}`, 170, y);
+    y += 8;
+  });
+
+  // Total
+  y += 4;
+  doc.setFont(undefined, 'bold');
+  doc.text(`Grand Total: ₹${total.toFixed(2)}`, 150, y);
+  doc.save("Ishwar_Pharma_Order.pdf");
+}
   </script>
 </body>
 
