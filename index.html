@@ -192,25 +192,15 @@
         const div = document.createElement("div");
         div.className = "product-card";
         div.textContent = ${p.brand} | ${p.company} | ₹${p.rate} | MRP ₹${p.mrp};
-
-
-div.onclick = () => {
-  selectedProduct = p;
-  document.getElementById("entryForm").style.display = "block";
-  container.innerHTML = "";
-
-  // Show Rate & MRP when entering qty
-  const rateInfo = document.createElement("div");
-  rateInfo.innerHTML = `💰 <b>Rate:</b> ₹${p.rate} &nbsp;&nbsp; 🏷️ <b>MRP:</b> ₹${p.mrp}`;
-  rateInfo.style.marginBottom = "10px";
-  rateInfo.style.fontSize = "16px";
-  rateInfo.style.fontWeight = "bold";
-
-  container.appendChild(rateInfo);
-
-  document.getElementById("search").value = "";
-};
-
+        div.onclick = () => {
+          selectedProduct = p;
+          document.getElementById("entryForm").style.display = "block";
+          container.innerHTML = "";
+          document.getElementById("search").value = ${p.brand} ${p.company};
+        };
+        container.appendChild(div);
+      });
+    }
 
     function addToCart() {
       const qty = +document.getElementById("qty").value;
