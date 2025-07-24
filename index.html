@@ -100,22 +100,26 @@
     const today = new Date().toISOString().slice(0, 10); // Format: YYYY-MM-DD
     dateField.value = today;
   };
+
+  function nextScreen() {
+    document.getElementById("screen1").classList.remove("active");
+    document.getElementById("screen2").classList.add("active");
+  }
 </script>
 
-
-  <header>📝 Ishwar Pharma Order Form</header>
-  <main>
-    <div class="screen active" id="screen1">
-      <label>Date:</label>
-      <input type="text" id="date" readonly>
-      <label>Salesman Name:</label>
-      <input type="text" id="salesman">
-      <label>Party Name:</label>
-      <input type="text" id="party">
-      <label>Place/District:</label>
-      <input type="text" id="place">
-      <button onclick="nextScreen()">🚀 Start Ordering</button>
-    </div>
+<header>📝 Ishwar Pharma Order Form</header>
+<main>
+  <div class="screen active" id="screen1">
+    <label>Date:</label>
+    <input type="text" id="date" readonly>
+    <label>Salesman Name:</label>
+    <input type="text" id="salesman">
+    <label>Party Name:</label>
+    <input type="text" id="party">
+    <label>Place/District:</label>
+    <input type="text" id="place">
+    <button onclick="nextScreen()">🚀 Start Ordering</button>
+  </div>
 
     <div class="screen" id="screen2">
       <label>🔍 Search Product:</label>
