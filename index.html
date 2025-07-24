@@ -93,6 +93,16 @@
 </head>
 
 <body>
+
+<script>
+  window.onload = function () {
+    const dateField = document.getElementById("date");
+    const today = new Date().toISOString().slice(0, 10); // Format: YYYY-MM-DD
+    dateField.value = today;
+  };
+</script>
+
+
   <header>📝 Ishwar Pharma Order Form</header>
   <main>
     <div class="screen active" id="screen1">
