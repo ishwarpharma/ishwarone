@@ -1,268 +1,276 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-  <title>Ishwar Pharma Order Form</title>
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ishwar Pharma Order Form</title>
   <style>
     body {
       font-family: Arial, sans-serif;
+      background: #f4f6f8;
       margin: 0;
-      padding: 10px;
-      background-color: #f0f8ff;
+      padding: 0;
+      color: #333;
     }
-    h1 {
-      text-align: center;
-      color: #2c3e50;
-    }
-    .input-container, .product-search, .entry-form, .cart, .finalize {
-      margin: 20px auto;
-      max-width: 600px;
-      padding: 15px;
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    label {
-      display: block;
-      margin-top: 10px;
-      font-weight: bold;
-    }
-    input[type=text], input[type=number] {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-    }
-    input[type=number]::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-    button {
-      background-color: #3498db;
+
+    header {
+      background-color: #1e90ff;
       color: white;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      margin-top: 15px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-    button:hover {
-      background-color: #2980b9;
-    }
-    .product-result {
-      margin-top: 10px;
-      padding: 8px;
-      background: #ecf0f1;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .cart table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    .cart th, .cart td {
-      border: 1px solid #ddd;
-      padding: 8px;
+      padding: 1rem;
       text-align: center;
+      font-size: 1.5rem;
     }
-    .cart th {
-      background-color: #f2f2f2;
+
+    main {
+      padding: 1rem;
     }
-    .small-text {
-      font-size: 14px;
-      color: #555;
+
+    .screen {
+      display: none;
     }
-    .rate-info {
-      margin-top: 10px;
-      font-weight: bold;
-      color: #444;
-      font-size: 16px;
+
+    .active {
+      display: block;
+    }
+
+    input, button, select {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+
+    button {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #218838;
+    }
+
+    .product-card {
+      padding: 0.5rem;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      margin-bottom: 0.5rem;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .emoji {
+      font-size: 1.2rem;
+    }
+
+    .cart-item-actions button {
+      background: transparent;
+      color: #007bff;
+      border: none;
+      font-size: 1rem;
+    }
+
+    .cart-item-actions button:hover {
+      text-decoration: underline;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .row > div {
+      flex: 1;
     }
   </style>
 </head>
+
 <body>
-  <h1>🧾 Ishwar Pharma Order Form</h1>
+  <header>📝 Ishwar Pharma Order Form</header>
+  <main>
+    <div class="screen active" id="screen1">
+      <label>Date:</label>
+      <input type="text" id="date" readonly>
+      <label>Salesman Name:</label>
+      <input type="text" id="salesman">
+      <label>Party Name:</label>
+      <input type="text" id="party">
+      <label>Place/District:</label>
+      <input type="text" id="place">
+      <button onclick="nextScreen()">🚀 Start Ordering</button>
+    </div>
 
-  <div class="input-container" id="infoForm">
-    <label>Date:</label>
-    <input type="text" id="orderDate" readonly>
-    <label>Salesman Name:</label>
-    <input type="text" id="salesman">
-    <label>Party Name:</label>
-    <input type="text" id="party">
-    <label>Place:</label>
-    <input type="text" id="place">
-    <button onclick="startOrdering()">Start Ordering 🛒</button>
-  </div>
+    <div class="screen" id="screen2">
+      <label>🔍 Search Product:</label>
+      <input type="text" id="search" oninput="filterProducts()" placeholder="Enter brand name and company name">
+      <div id="suggestions"></div>
 
-  <div class="product-search" id="searchSection" style="display:none;">
-    <label>Search Product (Brand Company):</label>
-    <input type="text" id="search" onkeyup="filterProducts()" placeholder="e.g. ZERODER Intas">
-    <div id="results"></div>
-  </div>
+      <div id="entryForm" style="display:none">
+        <div class="row">
+          <div>
+            <label>Qty</label>
+            <input type="number" inputmode="numeric" id="qty">
+          </div>
+          <div>
+            <label>Discount %</label>
+            <input type="number" inputmode="numeric" id="disc">
+          </div>
+          <div>
+            <label>Special Rate</label>
+            <input type="number" inputmode="numeric" id="splRate">
+          </div>
+        </div>
+        <button onclick="addToCart()">➕ Add to Cart</button>
+      </div>
 
-  <div class="entry-form" id="entryForm" style="display:none;"></div>
+      <h3>🛒 Cart</h3>
+      <div id="cart"></div>
+      <button onclick="finalizeOrder()">📥 Finalise & Download PDF</button>
+    </div>
+  </main>
 
-  <div class="cart" id="cartSection" style="display:none;">
-    <h3>🛍️ Cart Items</h3>
-    <table id="cartTable">
-      <thead>
-        <tr>
-          <th>#</th><th>Product</th><th>Qty</th><th>Disc%</th><th>Spl Rate</th><th>Amount</th><th>❌</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-
-  <div class="finalize" id="finalSection" style="display:none;">
-    <button onclick="finalizeOrder()">📥 Finalise & Download PDF</button>
-  </div>
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
-    const products = [
-      { brand: "ZERODER", company: "INTAS", rate: 25.00, mrp: 40.00 },
-      { brand: "URODIV", company: "INTAS", rate: 55.00, mrp: 85.00 },
-      { brand: "ZINCOVIT", company: "APL", rate: 10.00, mrp: 18.00 },
-    ];
-    let selectedProduct = null;
+    let stockData = [];
     let cart = [];
+    let selectedProduct = null;
 
-    document.getElementById("orderDate").value = new Date().toISOString().split("T")[0];
+    document.getElementById("date").value = new Date().toISOString().split('T')[0];
 
-    function startOrdering() {
-      if (!document.getElementById("salesman").value || !document.getElementById("party").value || !document.getElementById("place").value) {
+    async function fetchExcel() {
+      const response = await fetch("stock.xlsx");
+      const blob = await response.blob();
+      const data = await blob.arrayBuffer();
+      const workbook = XLSX.read(data);
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+      json.forEach(row => {
+        if (row[1] && row[13] && row[12] && row[10]) {
+          stockData.push({
+            brand: row[1],
+            company: row[13],
+            rate: row[12],
+            mrp: row[10]
+          });
+        }
+      });
+    }
+
+    fetchExcel();
+
+    function nextScreen() {
+      const s = document.getElementById("salesman").value;
+      const p = document.getElementById("party").value;
+      const pl = document.getElementById("place").value;
+      if (s && p && pl) {
+        document.getElementById("screen1").classList.remove("active");
+        document.getElementById("screen2").classList.add("active");
+      } else {
         alert("Please fill all fields");
-        return;
       }
-      document.getElementById("searchSection").style.display = "block";
     }
 
     function filterProducts() {
-      const keyword = document.getElementById("search").value.toLowerCase();
-      const results = document.getElementById("results");
-      results.innerHTML = "";
-
-      const words = keyword.split(" ");
-      const brand = words[0] || "";
-      const company = words[1] || "";
-
-      const filtered = products.filter(p =>
-        p.brand.toLowerCase().includes(brand) &&
-        p.company.toLowerCase().includes(company)
+      const input = document.getElementById("search").value.toLowerCase();
+      const [brandSearch, companySearch = ""] = input.split(" ");
+      const matches = stockData.filter(p =>
+        p.brand.toLowerCase().includes(brandSearch) &&
+        p.company.toLowerCase().includes(companySearch)
       );
 
-      filtered.forEach((p, index) => {
+      const container = document.getElementById("suggestions");
+      container.innerHTML = "";
+      matches.slice(0, 10).forEach(p => {
         const div = document.createElement("div");
-        div.className = "product-result";
-        div.innerHTML = `💊 ${p.brand} (${p.company})`;
-        div.onclick = () => {
-          selectedProduct = p;
-          document.getElementById("entryForm").style.display = "block";
-          const container = document.getElementById("entryForm");
-          container.innerHTML = "";
+        div.className = "product-card";
+        div.textContent = ${p.brand} | ${p.company} | ₹${p.rate} | MRP ₹${p.mrp};
 
-          // ✅ Show Rate & MRP
-          const rateInfo = document.createElement("div");
-          rateInfo.className = "rate-info";
-          rateInfo.innerHTML = `💰 <b>Rate:</b> ₹${p.rate} &nbsp;&nbsp; 🏷️ <b>MRP:</b> ₹${p.mrp}`;
-          container.appendChild(rateInfo);
 
-          const qtyInput = document.createElement("input");
-          qtyInput.type = "number";
-          qtyInput.placeholder = "Quantity";
-          qtyInput.id = "qty";
+div.onclick = () => {
+  selectedProduct = p;
+  document.getElementById("entryForm").style.display = "block";
+  container.innerHTML = "";
 
-          const discInput = document.createElement("input");
-          discInput.type = "number";
-          discInput.placeholder = "Discount %";
-          discInput.id = "disc";
+  // Show Rate & MRP when entering qty
+  const rateInfo = document.createElement("div");
+  rateInfo.innerHTML = `💰 <b>Rate:</b> ₹${p.rate} &nbsp;&nbsp; 🏷️ <b>MRP:</b> ₹${p.mrp}`;
+  rateInfo.style.marginBottom = "10px";
+  rateInfo.style.fontSize = "16px";
+  rateInfo.style.fontWeight = "bold";
 
-          const splInput = document.createElement("input");
-          splInput.type = "number";
-          splInput.placeholder = "Special Rate";
-          splInput.id = "spl";
+  container.appendChild(rateInfo);
 
-          const addBtn = document.createElement("button");
-          addBtn.textContent = "➕ Add to Cart";
-          addBtn.onclick = addToCart;
+  document.getElementById("search").value = "";
+};
 
-          container.appendChild(qtyInput);
-          container.appendChild(discInput);
-          container.appendChild(splInput);
-          container.appendChild(addBtn);
-
-          document.getElementById("search").value = "";
-        };
-        results.appendChild(div);
-      });
-    }
 
     function addToCart() {
-      const qty = parseInt(document.getElementById("qty").value);
-      const disc = parseFloat(document.getElementById("disc").value);
-      const spl = parseFloat(document.getElementById("spl").value);
-      const amount = qty * (spl || selectedProduct.rate) * (1 - (disc || 0) / 100);
-
-      cart.push({ ...selectedProduct, qty, disc, spl, amount: amount.toFixed(2) });
-      renderCart();
+      const qty = +document.getElementById("qty").value;
+      const disc = +document.getElementById("disc").value;
+      const splRate = +document.getElementById("splRate").value;
+      cart.push({ ...selectedProduct, qty, disc, splRate });
       document.getElementById("entryForm").style.display = "none";
+      document.getElementById("qty").value = "";
+      document.getElementById("disc").value = "";
+      document.getElementById("splRate").value = "";
+      renderCart();
     }
 
     function renderCart() {
-      const tbody = document.querySelector("#cartTable tbody");
-      tbody.innerHTML = "";
-      cart.forEach((item, i) => {
-        const row = tbody.insertRow();
-        row.innerHTML = `
-          <td>${i + 1}</td>
-          <td>${item.brand} (${item.company})</td>
-          <td>${item.qty}</td>
-          <td>${item.disc}</td>
-          <td>${item.spl}</td>
-          <td>₹${item.amount}</td>
-          <td><button onclick="removeItem(${i})">❌</button></td>
-        `;
+      const c = document.getElementById("cart");
+      c.innerHTML = "";
+      cart.forEach((item, index) => {
+        const div = document.createElement("div");
+        div.className = "product-card";
+        div.innerHTML = ${index + 1}. ${item.brand} (${item.company}) - Qty: ${item.qty} | Rate: ₹${item.rate} | Spl: ₹${item.splRate || "-"} | Disc: ${item.disc || 0}% <span class='cart-item-actions'><button onclick='removeItem(${index})'>❌</button></span>;
+        c.appendChild(div);
       });
-      document.getElementById("cartSection").style.display = "block";
-      document.getElementById("finalSection").style.display = "block";
     }
 
-    function removeItem(index) {
-      cart.splice(index, 1);
+    function removeItem(i) {
+      cart.splice(i, 1);
       renderCart();
     }
 
-    function finalizeOrder() {
-      let content = `
-        <h2>🧾 Order Summary</h2>
-        <p><b>Date:</b> ${document.getElementById("orderDate").value}</p>
-        <p><b>Salesman:</b> ${document.getElementById("salesman").value}</p>
-        <p><b>Party:</b> ${document.getElementById("party").value}</p>
-        <p><b>Place:</b> ${document.getElementById("place").value}</p>
-        <table border='1' cellpadding='8' cellspacing='0'>
-          <tr><th>#</th><th>Product</th><th>Qty</th><th>Disc%</th><th>Spl Rate</th><th>Amount</th></tr>`;
+    async function finalizeOrder() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      let y = 10;
+      doc.text("Ishwar Pharma Order", 10, y);
+      y += 10;
+      doc.text(Date: ${document.getElementById("date").value}, 10, y);
+      y += 10;
+      doc.text(Salesman: ${document.getElementById("salesman").value}, 10, y);
+      y += 10;
+      doc.text(Party: ${document.getElementById("party").value}, 10, y);
+      y += 10;
+      doc.text(Place: ${document.getElementById("place").value}, 10, y);
+      y += 10;
 
       let total = 0;
       cart.forEach((item, i) => {
-        content += `<tr>
-          <td>${i + 1}</td><td>${item.brand} (${item.company})</td>
-          <td>${item.qty}</td><td>${item.disc}</td><td>${item.spl}</td>
-          <td>₹${item.amount}</td></tr>`;
-        total += parseFloat(item.amount);
+        const amt = (item.splRate || item.rate) * item.qty * (1 - (item.disc || 0) / 100);
+        total += amt;
+        doc.text(${i + 1}. ${item.brand} ${item.company} | Qty: ${item.qty} | Rate: ₹${item.rate} | Spl: ₹${item.splRate || "-"} | Disc: ${item.disc || 0}% | Amt: ₹${amt.toFixed(2)}, 10, y);
+        y += 10;
+        if (y > 270) {
+          doc.addPage();
+          y = 10;
+        }
       });
-
-      content += `</table><h3>Total: ₹${total.toFixed(2)}</h3>`;
-
-      const blob = new Blob([content], { type: "application/vnd.ms-word" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = "Order_IshwarPharma.doc";
-      link.click();
+      y += 10;
+      doc.text(Total Amount: ₹${total.toFixed(2)}, 10, y);
+      doc.save("order.pdf");
     }
   </script>
 </body>
+
 </html>
