@@ -170,8 +170,6 @@
       const s = document.getElementById("salesman").value;
       const p = document.getElementById("party").value;
       const pl = document.getElementById("place").value;
-      document.getElementById("search").value = "";
-
       if (s && p && pl) {
         document.getElementById("screen1").classList.remove("active");
         document.getElementById("screen2").classList.add("active");
@@ -213,7 +211,9 @@
       document.getElementById("qty").value = "";
       document.getElementById("disc").value = "";
       document.getElementById("splRate").value = "";
-      renderCart();
+      document.getElementById("search").value = "";
+      document.getElementById("suggestions").innerHTML = "";      
+renderCart();
     }
 
     function renderCart() {
