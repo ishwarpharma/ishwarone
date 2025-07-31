@@ -96,6 +96,7 @@
   <header>📝 Ishwar Pharma Order Form</header>
   <main>
     <div class="screen active" id="screen1">
+    <div id="stockInfo" style="margin-bottom: 10px; font-weight: bold; color: #444;"></div>
       <label>Date:</label>
       <input type="text" id="date" readonly>
       <label>Salesman Name:</label>
@@ -112,23 +113,24 @@
       <input type="text" id="search" oninput="filterProducts()" placeholder="Enter brand name and company name">
       <div id="suggestions"></div>
 
-      <div id="entryForm" style="display:none">
-        <div class="row">
-          <div>
-            <label>Qty</label>
-            <input type="number" inputmode="numeric" id="qty">
-          </div>
-          <div>
-            <label>Discount %</label>
-            <input type="number" inputmode="numeric" id="disc">
-          </div>
-          <div>
-            <label>Special Rate</label>
-            <input type="number" inputmode="numeric" id="splRate">
-          </div>
-        </div>
-        <button onclick="addToCart()">➕ Add to Cart</button>
-      </div>
+<div id="entryForm" style="display:none">
+  <div id="rateInfo" style="font-weight:bold; margin-bottom:10px; color:#0055aa;"></div>
+  <div class="row">
+    <div>
+      <label>Qty</label>
+      <input type="number" inputmode="numeric" id="qty">
+    </div>
+    <div>
+      <label>Discount %</label>
+      <input type="number" inputmode="numeric" id="disc">
+    </div>
+    <div>
+      <label>Special Rate</label>
+      <input type="number" inputmode="numeric" id="splRate">
+    </div>
+  </div>
+  <button onclick="addToCart()">➕ Add to Cart</button>
+</div>
 
       <h3>🛒 Cart</h3>
       <div id="cart"></div>
@@ -165,6 +167,43 @@
     }
 
     fetchExcel();
+async function fetchExcel() {
+  const response = await fetch("stock.xlsx");
+  const blob = await response.blob();
+
+  // Show file date from header if available
+  const lastModified = response.headers.get("Last-Modified");
+  if (lastModified) {
+    const fileDate = new Date(lastModified).toLocaleDateString();
+    document.getElementById("stockInfo").innerText = `📦 Total Products: Loading... | 📅 Excel Date: ${fileDate}`;
+  } else {
+    document.getElementById("stockInfo").innerText = `📦 Total Products: Loading... | 📅 Excel Date: Unknown`;
+  }
+
+  const data = await blob.arrayBuffer();
+  const workbook = XLSX.read(data);
+  const sheet = workbook.Sheets[workbook.SheetNames[0]];
+  const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+  stockData = []; // Reset in case of re-load
+  json.forEach(row => {
+    if (row[1] && row[13] && row[12] && row[10]) {
+      stockData.push({
+        brand: row[1],
+        company: row[13],
+        rate: row[12],
+        mrp: row[10]
+      });
+    }
+  });
+
+  // Update stock count now that data is loaded
+  const stockInfo = document.getElementById("stockInfo");
+  const text = stockInfo.innerText;
+  stockInfo.innerText = text.replace("Loading...", stockData.length);
+}
+
+
 
     function nextScreen() {
       const s = document.getElementById("salesman").value;
@@ -192,14 +231,13 @@
         const div = document.createElement("div");
         div.className = "product-card";
         div.textContent = `${p.brand} | ${p.company} | ₹${p.rate} | MRP ₹${p.mrp}`;
-        div.onclick = () => {
-          selectedProduct = p;
-          document.getElementById("entryForm").style.display = "block";
-          container.innerHTML = "";
-          document.getElementById("search").value = `${p.brand} ${p.company}`;
-        };
-        container.appendChild(div);
-      });
+div.onclick = () => {
+  selectedProduct = p;
+  document.getElementById("entryForm").style.display = "block";
+  document.getElementById("rateInfo").innerHTML = `💰 <b>Rate:</b> ₹${p.rate} &nbsp;&nbsp; 🏷️ <b>MRP:</b> ₹${p.mrp}`;
+  container.innerHTML = "";
+  document.getElementById("search").value = `${p.brand} ${p.company}`;
+};
     }
 
     function addToCart() {
