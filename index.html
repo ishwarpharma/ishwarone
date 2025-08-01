@@ -112,23 +112,25 @@
       <input type="text" id="search" oninput="filterProducts()" placeholder="Enter brand name and company name">
       <div id="suggestions"></div>
 
-      <div id="entryForm" style="display:none">
-        <div class="row">
-          <div>
-            <label>Qty</label>
-            <input type="number" inputmode="numeric" id="qty">
-          </div>
-          <div>
-            <label>Discount %</label>
-            <input type="number" inputmode="numeric" id="disc">
-          </div>
-          <div>
-            <label>Special Rate</label>
-            <input type="number" inputmode="numeric" id="splRate">
-          </div>
-        </div>
-        <button onclick="addToCart()">➕ Add to Cart</button>
-      </div>
+<div id="entryForm" style="display:none">
+  <div id="rateInfo" style="font-weight:bold; margin-bottom:10px; color:#0055aa;"></div>
+  <div class="row">
+    <div>
+      <label>Qty</label>
+      <input type="number" inputmode="numeric" id="qty">
+    </div>
+    <div>
+      <label>Discount %</label>
+      <input type="number" inputmode="numeric" id="disc">
+    </div>
+    <div>
+      <label>Special Rate</label>
+      <input type="number" inputmode="numeric" id="splRate">
+    </div>
+  </div>
+  <button onclick="addToCart()">➕ Add to Cart</button>
+</div>
+ 
 
       <h3>🛒 Cart</h3>
       <div id="cart"></div>
@@ -192,12 +194,14 @@
         const div = document.createElement("div");
         div.className = "product-card";
         div.textContent = `${p.brand} | ${p.company} | ₹${p.rate} | MRP ₹${p.mrp}`;
-        div.onclick = () => {
-          selectedProduct = p;
-          document.getElementById("entryForm").style.display = "block";
-          container.innerHTML = "";
-          document.getElementById("search").value = `${p.brand} ${p.company}`;
-        };
+        
+div.onclick = () => {
+  selectedProduct = p;
+  document.getElementById("entryForm").style.display = "block";
+  document.getElementById("rateInfo").innerHTML = `💰 <b>Rate:</b> ₹${p.rate} &nbsp;&nbsp; 🏷️ <b>MRP:</b> ₹${p.mrp}`;
+  container.innerHTML = "";
+  document.getElementById("search").value = `${p.brand} ${p.company}`;
+};
         container.appendChild(div);
       });
     }
