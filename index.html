@@ -130,7 +130,7 @@
   </div>
   <button onclick="addToCart()">➕ Add to Cart</button>
 </div>
- 
+
 
       <h3>🛒 Cart</h3>
       <div id="cart"></div>
@@ -182,7 +182,11 @@
 
     function filterProducts() {
       const input = document.getElementById("search").value.toLowerCase();
-      const [brandSearch, companySearch = ""] = input.split(" ");
+      // Updated to handle single word search better
+      const parts = input.split(" ").filter(Boolean); // Split by space and remove empty strings
+      const brandSearch = parts[0] || "";
+      const companySearch = parts.slice(1).join(" ") || ""; // Join remaining parts for company search
+
       const matches = stockData.filter(p =>
         p.brand.toLowerCase().includes(brandSearch) &&
         p.company.toLowerCase().includes(companySearch)
@@ -194,11 +198,11 @@
         const div = document.createElement("div");
         div.className = "product-card";
         div.innerHTML = `${p.brand} | ${p.company} | <span style="color:red; font-weight:bold;">₹${parseFloat(p.rate).toFixed(2)}</span> | MRP ₹${parseFloat(p.mrp).toFixed(2)}`;
-        
+
 div.onclick = () => {
   selectedProduct = p;
   document.getElementById("entryForm").style.display = "block";
-  document.getElementById("rateInfo").innerHTML = `💰 <b>Rate:</b> ₹${p.rate} &nbsp;&nbsp; 🏷️ <b>MRP:</b> ₹${p.mrp}`;
+  document.getElementById("rateInfo").innerHTML = `💰 <b>Rate:</b> ₹${parseFloat(p.rate).toFixed(2)} &nbsp;&nbsp; 🏷️ <b>MRP:</b> ₹${parseFloat(p.mrp).toFixed(2)}`; // Fixed rate/mrp display
   container.innerHTML = "";
   document.getElementById("search").value = `${p.brand} ${p.company}`;
 };
@@ -207,17 +211,22 @@ div.onclick = () => {
     }
 
     function addToCart() {
-      const qty = +document.getElementById("qty").value;
-      const disc = +document.getElementById("disc").value;
-      const splRate = +document.getElementById("splRate").value;
-      cart.push({ ...selectedProduct, qty, disc, splRate });
-      document.getElementById("entryForm").style.display = "none";
-      document.getElementById("qty").value = "";
-      document.getElementById("disc").value = "";
-      document.getElementById("splRate").value = "";
-      document.getElementById("search").value = "";
-      document.getElementById("suggestions").innerHTML = "";      
-renderCart();
+      const qty = parseFloat(document.getElementById("qty").value) || 0; // Ensure number
+      const disc = parseFloat(document.getElementById("disc").value) || 0; // Ensure number
+      const splRate = parseFloat(document.getElementById("splRate").value) || 0; // Ensure number
+
+      if (selectedProduct && qty > 0) { // Only add if product selected and quantity > 0
+          cart.push({ ...selectedProduct, qty, disc, splRate });
+          document.getElementById("entryForm").style.display = "none";
+          document.getElementById("qty").value = "";
+          document.getElementById("disc").value = "";
+          document.getElementById("splRate").value = "";
+          document.getElementById("search").value = "";
+          document.getElementById("suggestions").innerHTML = "";
+          renderCart();
+      } else {
+          alert("Please select a product and enter a valid quantity.");
+      }
     }
 
     function renderCart() {
@@ -226,7 +235,8 @@ renderCart();
       cart.forEach((item, index) => {
         const div = document.createElement("div");
         div.className = "product-card";
-        div.innerHTML = `${index + 1}. ${item.brand} (${item.company}) - Qty: ${item.qty} | Rate: ₹${item.rate} | Spl: ₹${item.splRate || "-"} | Disc: ${item.disc || 0}% <span class='cart-item-actions'><button onclick='removeItem(${index})'>❌</button></span>`;
+        const effectiveRateDisplay = item.splRate > 0 ? `Spl: ₹${item.splRate.toFixed(2)}` : `Rate: ₹${item.rate.toFixed(2)}`;
+        div.innerHTML = `${index + 1}. ${item.brand} (${item.company}) - Qty: ${item.qty} | ${effectiveRateDisplay} | Disc: ${item.disc || 0}% <span class='cart-item-actions'><button onclick='removeItem(${index})'>❌</button></span>`;
         c.appendChild(div);
       });
     }
@@ -249,56 +259,107 @@ async function finalizeOrder() {
   let total = 0;
 
   const rows = cart.map((item, index) => {
-    const rate = parseFloat(item.rate);
-    const spl = item.splRate || "-";
-    const disc = item.disc || 0;
-    const qty = item.qty || 0;
-    const effectiveRate = item.splRate || item.rate;
-    const amt = qty * effectiveRate * (1 - disc / 100);
-    total += amt;
+    const rate = parseFloat(item.rate) || 0;
+    const spl = parseFloat(item.splRate) || 0; // Ensure spl is a number
+    const disc = parseFloat(item.disc) || 0; // Ensure disc is a number
+    const qty = parseFloat(item.qty) || 0; // Ensure qty is a number
+
+    const effectiveRate = spl > 0 ? spl : rate; // Use special rate if provided, else regular rate
+    const amountBeforeDiscount = qty * effectiveRate;
+    const amount = amountBeforeDiscount * (1 - disc / 100);
+    total += amount;
 
     return [
       index + 1,
       item.brand,
       item.company,
       qty,
-      `₹${rate}`,
-      spl === "-" ? "-" : `₹${spl}`,
-      `${disc}%`,
-      `₹${amt.toFixed(2)}`
+      `₹${rate.toFixed(2)}`,
+      spl > 0 ? `₹${spl.toFixed(2)}` : `-`, // Display Spl Rate only if > 0
+      `${disc.toFixed(0)}%`, // Display discount without decimals if 0
+      `₹${amount.toFixed(2)}`
     ];
   });
 
-  doc.setFontSize(16);
-  doc.setTextColor(40, 40, 40);
-  doc.text("🧾 Ishwar Pharma - Purchase Order", 14, 15);
-
+  // --- PDF Header and Details ---
+  doc.setFontSize(18);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(30, 144, 255); // Dodger Blue
+  doc.text("📝 Ishwar Pharma", 14, 15);
   doc.setFontSize(12);
-  doc.text(`📅 Date: ${date}`, 14, 25);
-  doc.text(`👨‍💼 Salesman: ${salesman}`, 14, 32);
-  doc.text(`🏬 Party: ${party}`, 14, 39);
-  doc.text(`📍 Place: ${place}`, 14, 46);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(50, 50, 50);
+  doc.text("Purchase Order", 14, 22);
 
-  // Add table
+
+  doc.setFontSize(11);
+  doc.setTextColor(0, 0, 0); // Black for details
+
+  let yOffset = 30;
+  doc.text(`📅 Date: ${date}`, 14, yOffset);
+  yOffset += 7;
+  doc.text(`👨‍💼 Salesman: ${salesman}`, 14, yOffset);
+  yOffset += 7;
+  doc.text(`🏬 Party: ${party}`, 14, yOffset);
+  yOffset += 7;
+  doc.text(`📍 Place: ${place}`, 14, yOffset);
+  yOffset += 10; // Extra space before table
+
+  // --- Table ---
   doc.autoTable({
-    startY: 55,
+    startY: yOffset,
     head: [["Sr", "Brand", "Company", "Qty", "Rate", "Spl Rate", "Disc%", "Amount"]],
     body: rows,
-    theme: 'grid',
-    styles: { fontSize: 10 },
+    theme: 'striped', // Changed to striped theme for better readability
+    styles: {
+      fontSize: 9,
+      cellPadding: 2,
+      halign: 'center', // Center align all cells
+      valign: 'middle',
+    },
     headStyles: {
-      fillColor: [30, 144, 255],
-      textColor: 255,
+      fillColor: [30, 144, 255], // Dodger Blue
+      textColor: 255, // White
+      fontStyle: 'bold',
       halign: 'center',
     },
     bodyStyles: {
-      halign: 'center',
+        textColor: [50, 50, 50],
     },
+    alternateRowStyles: {
+        fillColor: [240, 240, 240] // Light grey for alternate rows
+    },
+    columnStyles: {
+        0: { cellWidth: 10 }, // Sr
+        1: { cellWidth: 45, halign: 'left' }, // Brand - left align
+        2: { cellWidth: 35, halign: 'left' }, // Company - left align
+        3: { cellWidth: 15 }, // Qty
+        4: { cellWidth: 20 }, // Rate
+        5: { cellWidth: 20 }, // Spl Rate
+        6: { cellWidth: 15 }, // Disc%
+        7: { cellWidth: 25 }, // Amount
+    },
+    didDrawPage: function(data) {
+        // Footer
+        doc.setFontSize(10);
+        doc.setTextColor(150);
+        doc.text(`Page ${doc.internal.getNumberOfPages()}`, data.settings.margin.left, doc.internal.pageSize.height - 10);
+    }
   });
 
-  doc.setFontSize(13);
+  // --- Grand Total ---
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
   doc.setTextColor(0, 0, 0);
-  doc.text(`Grand Total: ₹${total.toFixed(2)}`, 150, doc.lastAutoTable.finalY + 10);
+  doc.text(`Grand Total: ₹${total.toFixed(2)}`, doc.internal.pageSize.width - doc.autoTable.columnStyles.Amount.cellWidth - 14, doc.lastAutoTable.finalY + 10, { align: 'right' }); // Right align total
+
+  // --- Footer Signature Line ---
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "italic");
+  doc.setTextColor(100, 100, 100);
+  doc.text("Authorised Signature", doc.internal.pageSize.width - 50, doc.lastAutoTable.finalY + 30, { align: 'right' });
+  doc.line(doc.internal.pageSize.width - 70, doc.lastAutoTable.finalY + 28, doc.internal.pageSize.width - 15, doc.lastAutoTable.finalY + 28); // Signature line
+
 
   doc.save("Ishwar_Pharma_PO.pdf");
 }
