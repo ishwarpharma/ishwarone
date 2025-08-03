@@ -193,7 +193,7 @@
       matches.slice(0, 10).forEach(p => {
         const div = document.createElement("div");
         div.className = "product-card";
-        div.textContent = `${p.brand} | ${p.company} | ₹${p.rate} | MRP ₹${p.mrp}`;
+        div.innerHTML = `${p.brand} | ${p.company} | <b style="color:red;">₹${parseFloat(p.rate).toFixed(2)}</b> | MRP ₹${parseFloat(p.mrp).toFixed(2)}`;
         
 div.onclick = () => {
   selectedProduct = p;
