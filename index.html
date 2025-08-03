@@ -191,10 +191,9 @@
       const container = document.getElementById("suggestions");
       container.innerHTML = "";
       matches.slice(0, 10).forEach(p => {
-        const div = document.createElement("div");
-        div.className = "product-card";
-        div.textContent = `${p.brand} | ${p.company} | <b style="color:red;">₹${p.rate}</b> |  ₹${p.mrp}`;
-
+      const div = document.createElement("div");
+      div.className = "product-card";
+      div.innerHTML = `${p.brand} | ${p.company} | <b style="color:red;">₹${parseFloat(p.rate).toFixed(2)}</b> |  ₹${parseFloat(p.mrp).toFixed(2)}`;
         
 div.onclick = () => {
   selectedProduct = p;
