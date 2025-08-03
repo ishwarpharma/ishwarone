@@ -184,11 +184,12 @@ function nextScreen() {
 }
     function filterProducts() {
       const input = document.getElementById("search").value.toLowerCase();
-      const [brandSearch, companySearch = ""] = input.split(" ");
-      const matches = stockData.filter(p =>
-        p.brand.toLowerCase().includes(brandSearch) &&
-        p.company.toLowerCase().includes(companySearch)
-      );
+     const query = input.toLowerCase();
+     const matches = stockData.filter(p => {
+     const fullText = `${p.brand} ${p.company}`.toLowerCase();
+      return fullText.includes(query);
+});
+      
 
       const container = document.getElementById("suggestions");
       container.innerHTML = "";
