@@ -2,6 +2,9 @@
 <html lang="en">
 
 <head>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ishwar Pharma Order Form</title>
@@ -239,7 +242,6 @@ renderCart();
       renderCart();
     }
 
-
 async function finalizeOrder() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
@@ -249,62 +251,82 @@ async function finalizeOrder() {
   const party = document.getElementById("party").value;
   const place = document.getElementById("place").value;
 
-  let total = 0;
-
-  const rows = cart.map((item, index) => {
-    const rate = parseFloat(item.rate);
-    const spl = item.splRate || "-";
-    const disc = item.disc || 0;
-    const qty = item.qty || 0;
-    const effectiveRate = item.splRate || item.rate;
-    const amt = qty * effectiveRate * (1 - disc / 100);
-    total += amt;
-
-    return [
-      index + 1,
-      item.brand,
-      item.company,
-      qty,
-      `₹${rate}`,
-      spl === "-" ? "-" : `₹${spl}`,
-      `${disc}%`,
-      `₹${amt.toFixed(2)}`
-    ];
-  });
-
+  // Header
   doc.setFontSize(16);
-  doc.setTextColor(40, 40, 40);
+  doc.setTextColor(30, 144, 255); // Dodger Blue
   doc.text("🧾 Ishwar Pharma - Purchase Order", 14, 15);
 
   doc.setFontSize(12);
+  doc.setTextColor(0, 0, 0);
   doc.text(`📅 Date: ${date}`, 14, 25);
   doc.text(`👨‍💼 Salesman: ${salesman}`, 14, 32);
   doc.text(`🏬 Party: ${party}`, 14, 39);
   doc.text(`📍 Place: ${place}`, 14, 46);
 
-  // Add table
+  // Prepare rows for table
+  let total = 0;
+  const rows = cart.map((item, index) => {
+    const qty = item.qty;
+    const rate = parseFloat(item.rate);
+    const splRate = item.splRate ? parseFloat(item.splRate) : "-";
+    const disc = item.disc || 0;
+    const finalRate = item.splRate || rate * (1 - disc / 100);
+    const amt = qty * finalRate;
+    total += amt;
+    return [
+      index + 1,
+      item.brand,
+      item.company,
+      qty,
+      `₹${rate.toFixed(2)}`,
+      splRate === "-" ? "-" : `₹${splRate.toFixed(2)}`,
+      `${disc}%`,
+      `₹${amt.toFixed(2)}`
+    ];
+  });
+
+  // Table with grid and colors
   doc.autoTable({
     startY: 55,
     head: [["Sr", "Brand", "Company", "Qty", "Rate", "Spl Rate", "Disc%", "Amount"]],
     body: rows,
-    theme: 'grid',
-    styles: { fontSize: 10 },
+    theme: "grid",
     headStyles: {
-      fillColor: [30, 144, 255],
+      fillColor: [0, 123, 255], // Bootstrap blue
       textColor: 255,
-      halign: 'center',
+      fontStyle: "bold",
+      halign: "center"
     },
     bodyStyles: {
-      halign: 'center',
+      fontSize: 10,
+      halign: "center"
     },
+    styles: {
+      overflow: "linebreak",
+      cellPadding: 3
+    },
+    columnStyles: {
+      0: { cellWidth: 10 },   // Sr
+      1: { cellWidth: 30 },   // Brand
+      2: { cellWidth: 30 },   // Company
+      3: { cellWidth: 15 },   // Qty
+      4: { cellWidth: 20 },   // Rate
+      5: { cellWidth: 25 },   // Spl Rate
+      6: { cellWidth: 20 },   // Disc
+      7: { cellWidth: 25 }    // Amount
+    }
   });
 
+  // Grand total
+  const y = doc.lastAutoTable.finalY + 10;
   doc.setFontSize(13);
   doc.setTextColor(0, 0, 0);
-  doc.text(`Grand Total: ₹${total.toFixed(2)}`, 150, doc.lastAutoTable.finalY + 10);
+  doc.setFont(undefined, 'bold');
+  doc.text(`🔢 Grand Total: ₹${total.toFixed(2)}`, 150, y, { align: "right" });
 
   doc.save("Ishwar_Pharma_PO.pdf");
 }
+
   </script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
