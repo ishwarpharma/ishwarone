@@ -168,18 +168,20 @@
 
     fetchExcel();
 
-    function nextScreen() {
-      const s = document.getElementById("salesman").value;
-      const p = document.getElementById("party").value;
-      const pl = document.getElementById("place").value;
-      if (s && p && pl) {
-        document.getElementById("screen1").classList.remove("active");
-        document.getElementById("screen2").classList.add("active");
-      } else {
-        alert("Please fill all fields");
-      }
-    }
+function nextScreen() {
+  const s = document.getElementById("salesman").value;
+  const p = document.getElementById("party").value;
+  const pl = document.getElementById("place").value;
 
+  if (!s || !p || !pl) {
+    if (!confirm("Some fields are empty. Do you want to continue just to view prices?")) {
+      return;
+    }
+  }
+
+  document.getElementById("screen1").classList.remove("active");
+  document.getElementById("screen2").classList.add("active");
+}
     function filterProducts() {
       const input = document.getElementById("search").value.toLowerCase();
       const [brandSearch, companySearch = ""] = input.split(" ");
