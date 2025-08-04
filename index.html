@@ -254,14 +254,14 @@ async function finalizeOrder() {
   // Header
   doc.setFontSize(16);
   doc.setTextColor(30, 144, 255); // Dodger Blue
-  doc.text("🧾 Ishwar Pharma - Purchase Order", 14, 15);
+  doc.text(" Ishwar Pharma - Purchase Order", 14, 15);
 
   doc.setFontSize(12);
   doc.setTextColor(0, 0, 0);
-  doc.text(`📅 Date: ${date}`, 14, 25);
-  doc.text(`👨‍💼 Salesman: ${salesman}`, 14, 32);
-  doc.text(`🏬 Party: ${party}`, 14, 39);
-  doc.text(`📍 Place: ${place}`, 14, 46);
+  doc.text(` Date: ${date}`, 14, 25);
+  doc.text(` Salesman: ${salesman}`, 14, 32);
+  doc.text(` Party: ${party}`, 14, 39);
+  doc.text(` Place: ${place}`, 14, 46);
 
   // Prepare rows for table
   let total = 0;
@@ -322,7 +322,7 @@ async function finalizeOrder() {
   doc.setFontSize(13);
   doc.setTextColor(0, 0, 0);
   doc.setFont(undefined, 'bold');
-  doc.text(`🔢 Grand Total: ₹${total.toFixed(2)}`, 150, y, { align: "right" });
+  doc.text(` Grand Total: ₹${total.toFixed(2)}`, 150, y, { align: "right" });
 
   doc.save("Ishwar_Pharma_PO.pdf");
 }
