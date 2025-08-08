@@ -2,9 +2,6 @@
 <html lang="en">
 
 <head>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ishwar Pharma Order Form</title>
@@ -37,7 +34,9 @@
       display: block;
     }
 
-    input, button, select {
+    input,
+    button,
+    select {
       width: 100%;
       padding: 10px;
       margin: 10px 0;
@@ -63,14 +62,10 @@
       border: 1px solid #ddd;
       margin-bottom: 0.5rem;
       border-radius: 6px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
       display: flex;
       justify-content: space-between;
       align-items: center;
-    }
-
-    .emoji {
-      font-size: 1.2rem;
     }
 
     .cart-item-actions button {
@@ -89,7 +84,7 @@
       gap: 10px;
     }
 
-    .row > div {
+    .row>div {
       flex: 1;
     }
   </style>
@@ -115,25 +110,23 @@
       <input type="text" id="search" oninput="filterProducts()" placeholder="Enter brand name and company name">
       <div id="suggestions"></div>
 
-<div id="entryForm" style="display:none">
-  <div id="rateInfo" style="font-weight:bold; margin-bottom:10px; color:#0055aa;"></div>
-  <div class="row">
-    <div>
-      <label>Qty</label>
-      <input type="number" inputmode="decimal" id="qty">
-    </div>
-    <div>
-      <label>Discount %</label>
-      <input type="number" inputmode="decimal" id="disc">
-    </div>
-    <div>
-      <label>Special Rate</label>
-      <input type="number" inputmode="decimal" id="splRate">
-    </div>
-  </div>
-  <button onclick="addToCart()">➕ Add to Cart</button>
-</div>
- 
+      <div id="entryForm" style="display:none">
+        <div class="row">
+          <div>
+            <label>Qty</label>
+            <input type="number" step="0.01" inputmode="decimal" id="qty">
+          </div>
+          <div>
+            <label>Discount %</label>
+            <input type="number" step="0.01" inputmode="decimal" id="disc">
+          </div>
+          <div>
+            <label>Special Rate</label>
+            <input type="number" step="0.01" inputmode="decimal" id="splRate">
+          </div>
+        </div>
+        <button onclick="addToCart()">➕ Add to Cart</button>
+      </div>
 
       <h3>🛒 Cart</h3>
       <div id="cart"></div>
@@ -141,8 +134,11 @@
     </div>
   </main>
 
+  <!-- Libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
   <script>
     let stockData = [];
     let cart = [];
@@ -171,43 +167,37 @@
 
     fetchExcel();
 
-function nextScreen() {
-  const s = document.getElementById("salesman").value;
-  const p = document.getElementById("party").value;
-  const pl = document.getElementById("place").value;
-
-  if (!s || !p || !pl) {
-    if (!confirm("Some fields are empty. Do you want to continue just to view prices?")) {
-      return;
+    function nextScreen() {
+      const s = document.getElementById("salesman").value;
+      const p = document.getElementById("party").value;
+      const pl = document.getElementById("place").value;
+      if (s && p && pl) {
+        document.getElementById("screen1").classList.remove("active");
+        document.getElementById("screen2").classList.add("active");
+      } else {
+        alert("Please fill all fields");
+      }
     }
-  }
 
-  document.getElementById("screen1").classList.remove("active");
-  document.getElementById("screen2").classList.add("active");
-}
     function filterProducts() {
       const input = document.getElementById("search").value.toLowerCase();
-     const query = input.toLowerCase();
-     const matches = stockData.filter(p => {
-     const fullText = `${p.brand} ${p.company}`.toLowerCase();
-      return fullText.includes(query);
-});
-      
+      const matches = stockData.filter(p =>
+        p.brand.toLowerCase().includes(input) ||
+        p.company.toLowerCase().includes(input)
+      );
 
       const container = document.getElementById("suggestions");
       container.innerHTML = "";
       matches.slice(0, 10).forEach(p => {
-      const div = document.createElement("div");
-      div.className = "product-card";
-      div.innerHTML = `${p.brand}   | ${p.company}   | <b style="color:red;">₹${parseFloat(p.rate).toFixed(2)}</b>   |  ₹${parseFloat(p.mrp).toFixed(2)}`;
-        
-div.onclick = () => {
-  selectedProduct = p;
-  document.getElementById("entryForm").style.display = "block";
-  document.getElementById("rateInfo").innerHTML = `💰 <b>Rate:</b> ₹${p.rate} &nbsp;&nbsp; 🏷️ <b>MRP:</b> ₹${p.mrp}`;
-  container.innerHTML = "";
-  document.getElementById("search").value = `${p.brand} ${p.company}`;
-};
+        const div = document.createElement("div");
+        div.className = "product-card";
+        div.innerHTML = `${p.brand} | ${p.company} | <span style="color:red;font-weight:bold;">₹${parseFloat(p.rate).toFixed(2)}</span> | MRP ₹${parseFloat(p.mrp).toFixed(2)}`;
+        div.onclick = () => {
+          selectedProduct = p;
+          document.getElementById("entryForm").style.display = "block";
+          container.innerHTML = "";
+          document.getElementById("search").value = "";
+        };
         container.appendChild(div);
       });
     }
@@ -221,9 +211,7 @@ div.onclick = () => {
       document.getElementById("qty").value = "";
       document.getElementById("disc").value = "";
       document.getElementById("splRate").value = "";
-      document.getElementById("search").value = "";
-      document.getElementById("suggestions").innerHTML = "";      
-renderCart();
+      renderCart();
     }
 
     function renderCart() {
@@ -242,98 +230,45 @@ renderCart();
       renderCart();
     }
 
+    async function finalizeOrder() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
 
-async function finalizeOrder() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
+      doc.setFontSize(18);
+      doc.text("Purchase Order - Ishwar Pharma", 14, 15);
+      doc.setFontSize(12);
+      doc.text(`Date: ${document.getElementById("date").value}`, 14, 25);
+      doc.text(`Salesman: ${document.getElementById("salesman").value}`, 14, 32);
+      doc.text(`Party: ${document.getElementById("party").value}`, 14, 39);
+      doc.text(`Place: ${document.getElementById("place").value}`, 14, 46);
 
-  const date = document.getElementById("date").value;
-  const salesman = document.getElementById("salesman").value;
-  const party = document.getElementById("party").value;
-  const place = document.getElementById("place").value;
+      const tableData = cart.map((item, i) => [
+        i + 1,
+        item.brand,
+        item.company,
+        item.qty,
+        parseFloat(item.rate).toFixed(2),
+        item.splRate ? parseFloat(item.splRate).toFixed(2) : "-",
+        `${item.disc || 0}%`,
+        ((item.splRate || item.rate) * item.qty * (1 - (item.disc || 0) / 100)).toFixed(2)
+      ]);
 
-  let total = 0;
+      let total = tableData.reduce((sum, row) => sum + parseFloat(row[7]), 0);
 
-  // Safely map all rows and stringify values
-  const rows = cart.map((item, index) => {
-    const qty = item.qty || 0;
-    const rate = parseFloat(item.rate) || 0;
-    const splRate = item.splRate ? parseFloat(item.splRate) : null;
-    const disc = item.disc || 0;
-    const finalRate = splRate || rate * (1 - disc / 100);
-    const amt = qty * finalRate;
-    total += amt;
+      doc.autoTable({
+        startY: 55,
+        head: [["S.No", "Brand", "Company", "Qty", "Rate", "Spl Rate", "Disc", "Amount"]],
+        body: tableData,
+        styles: { fontSize: 10 },
+        headStyles: { fillColor: [30, 144, 255], textColor: 255 },
+      });
 
-    return [
-      (index + 1).toString(),
-      item.brand.toString(),
-      item.company.toString(),
-      qty.toString(),
-      `₹${rate.toFixed(2)}`,
-      splRate ? `₹${splRate.toFixed(2)}` : "-",
-      `${disc}%`,
-      `₹${amt.toFixed(2)}`
-    ];
-  });
+      doc.setFontSize(12);
+      doc.text(`Grand Total: ₹${total.toFixed(2)}`, 14, doc.lastAutoTable.finalY + 10);
 
-  // Title and party info
-  doc.setFontSize(16);
-  doc.setTextColor(0, 0, 0);
-  doc.text("Ishwar Pharma - Purchase Order", 14, 15);
-
-  doc.setFontSize(12);
-  doc.text(`Date: ${date}`, 14, 25);
-  doc.text(`Salesman: ${salesman}`, 14, 32);
-  doc.text(`Party: ${party}`, 14, 39);
-  doc.text(`Place: ${place}`, 14, 46);
-
-  // Add formatted table
-  doc.autoTable({
-    startY: 55,
-    head: [["Sr", "Brand", "Company", "Qty", "Rate", "Spl Rate", "Disc%", "Amount"]],
-    body: rows,
-    theme: "grid",
-    headStyles: {
-      fillColor: [30, 144, 255],
-      textColor: 255,
-      fontStyle: "bold",
-      halign: "center"
-    },
-    bodyStyles: {
-      fontSize: 10,
-      halign: "center"
-    },
-    styles: {
-      overflow: "linebreak",
-      cellPadding: 3
-    },
-    columnStyles: {
-      0: { cellWidth: 10 },   // Sr
-      1: { cellWidth: 35 },   // Brand
-      2: { cellWidth: 35 },   // Company
-      3: { cellWidth: 15 },   // Qty
-      4: { cellWidth: 20 },   // Rate
-      5: { cellWidth: 25 },   // Spl Rate
-      6: { cellWidth: 20 },   // Disc
-      7: { cellWidth: 25 }    // Amount
+      doc.save("order.pdf");
     }
-  });
-
-  // Add total
-  const y = doc.lastAutoTable.finalY + 10;
-  doc.setFontSize(13);
-  doc.setFont(undefined, "bold");
-  doc.setTextColor(0, 0, 0);
-  doc.text(`Grand Total: ₹${total.toFixed(2)}`, 150, y, { align: "right" });
-
-  // Save the file
-  doc.save("Ishwar_Pharma_PO.pdf");
-}
-
   </script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-
 </body>
 
 </html>
