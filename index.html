@@ -238,7 +238,7 @@ renderCart();
       cart.forEach((item, index) => {
         const div = document.createElement("div");
         div.className = "product-card";
-        div.innerHTML = `${index + 1}. ${item.brand} (${item.company}) - Qty: ${item.qty} | Rate: ₹${item.rate} | Spl: ₹${item.splRate || "-"} | Disc: ${item.disc || 0}% <span class='cart-item-actions'><button onclick='removeItem(${index})'>❌</button></span>`;
+        div.innerHTML = `${index + 1}. ${item.brand} (${item.company}) - Qty: ${item.qty} ${item.qtyType || ''} | Rate: ₹${item.rate} | Spl: ₹${item.splRate || "-"} | Disc: ${item.disc || 0}% <span class='cart-item-actions'><button onclick='removeItem(${index})'>❌</button></span>`;
         c.appendChild(div);
       });
     }
@@ -260,9 +260,10 @@ async function finalizeOrder() {
 
   let total = 0;
 
-  // Safely map all rows and stringify values
+  // Prepare table rows
   const rows = cart.map((item, index) => {
     const qty = item.qty || 0;
+    const qtyType = item.qtyType || "";
     const rate = parseFloat(item.rate) || 0;
     const splRate = item.splRate ? parseFloat(item.splRate) : null;
     const disc = item.disc || 0;
@@ -274,7 +275,7 @@ async function finalizeOrder() {
       (index + 1).toString(),
       item.brand.toString(),
       item.company.toString(),
-      qty.toString(),
+      `${qty} ${qtyType}`,
       `₹${rate.toFixed(2)}`,
       splRate ? `₹${splRate.toFixed(2)}` : "-",
       `${disc}%`,
@@ -282,58 +283,36 @@ async function finalizeOrder() {
     ];
   });
 
-  // Title and party info
+  // Title and header info
   doc.setFontSize(16);
-  doc.setTextColor(0, 0, 0);
+  doc.setTextColor(0, 0, 150);
   doc.text("Ishwar Pharma - Purchase Order", 14, 15);
 
   doc.setFontSize(12);
+  doc.setTextColor(0, 0, 0);
   doc.text(`Date: ${date}`, 14, 25);
   doc.text(`Salesman: ${salesman}`, 14, 32);
   doc.text(`Party: ${party}`, 14, 39);
   doc.text(`Place: ${place}`, 14, 46);
 
-  // Add formatted table
+  // Table
   doc.autoTable({
-    startY: 55,
-    head: [["Sr", "Brand", "Company", "Qty", "Rate", "Spl Rate", "Disc%", "Amount"]],
+    head: [["#", "Brand", "Company", "Qty", "Rate", "Special Rate", "Disc%", "Amount"]],
     body: rows,
-    theme: "grid",
-    headStyles: {
-      fillColor: [30, 144, 255],
-      textColor: 255,
-      fontStyle: "bold",
-      halign: "center"
-    },
-    bodyStyles: {
-      fontSize: 10,
-      halign: "center"
-    },
-    styles: {
-      overflow: "linebreak",
-      cellPadding: 3
-    },
-    columnStyles: {
-      0: { cellWidth: 10 },   // Sr
-      1: { cellWidth: 35 },   // Brand
-      2: { cellWidth: 35 },   // Company
-      3: { cellWidth: 15 },   // Qty
-      4: { cellWidth: 20 },   // Rate
-      5: { cellWidth: 25 },   // Spl Rate
-      6: { cellWidth: 20 },   // Disc
-      7: { cellWidth: 25 }    // Amount
-    }
+    startY: 52,
+    styles: { halign: "center" },
+    headStyles: { fillColor: [30, 144, 255], textColor: 255, fontStyle: "bold" },
+    bodyStyles: { textColor: 0 },
   });
 
-  // Add total
-  const y = doc.lastAutoTable.finalY + 10;
-  doc.setFontSize(13);
-  doc.setFont(undefined, "bold");
-  doc.setTextColor(0, 0, 0);
-  doc.text(`Grand Total: ₹${total.toFixed(2)}`, 150, y, { align: "right" });
+  // Total
+  const finalY = doc.lastAutoTable.finalY + 10;
+  doc.setFontSize(14);
+  doc.setTextColor(200, 0, 0);
+  doc.text(`Grand Total: ₹${total.toFixed(2)}`, 14, finalY);
 
-  // Save the file
-  doc.save("Ishwar_Pharma_PO.pdf");
+  // Save
+  doc.save("purchase_order.pdf");
 }
 
   </script>
