@@ -118,10 +118,15 @@
 <div id="entryForm" style="display:none">
   <div id="rateInfo" style="font-weight:bold; margin-bottom:10px; color:#0055aa;"></div>
   <div class="row">
-    <div>
-      <label>Qty</label>
-      <input type="number" inputmode="decimal" id="qty">
-    </div>
+<div>
+  <label>Qty</label>
+  <input type="number" inputmode="decimal" id="qty">
+  <select id="qtyType">
+    <option value="Units">Units</option>
+    <option value="Box">Box</option>
+    <option value="Case">Case</option>
+  </select>
+</div>
     <div>
       <label>Discount %</label>
       <input type="number" inputmode="decimal" id="disc">
@@ -216,7 +221,8 @@ div.onclick = () => {
       const qty = +document.getElementById("qty").value;
       const disc = +document.getElementById("disc").value;
       const splRate = +document.getElementById("splRate").value;
-      cart.push({ ...selectedProduct, qty, disc, splRate });
+      const qtyType = document.getElementById("qtyType").value;
+      cart.push({ ...selectedProduct, qty, qtyType, disc, splRate });
       document.getElementById("entryForm").style.display = "none";
       document.getElementById("qty").value = "";
       document.getElementById("disc").value = "";
