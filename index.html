@@ -272,13 +272,13 @@ async function finalizeOrder() {
 
   // Table rows
   const rows = cart.map((item, index) => [
-    index + 1,
-    item.brand || "",
-    item.company || "",
-    item.qty || "",
-    `₹${parseFloat(item.rate || 0).toFixed(2)}`,
-    item.splRate ? `₹${parseFloat(item.splRate).toFixed(2)}` : "-",
-    `${item.disc || 0}%`
+index + 1,
+item.brand || "",
+item.company || "",
+(item.qty || "") + " " + (item.pack || ""),
+item.rate || "",
+item.splRate || "-",
+(item.disc || 0) + "%"
   ]);
 
   // Generate table
