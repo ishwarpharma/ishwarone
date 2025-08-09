@@ -257,18 +257,7 @@ async function finalizeOrder() {
   const party = document.getElementById("party").value;
   const place = document.getElementById("place").value;
 
-  // Map table rows (no amount column)
-  const rows = cart.map((item, index) => [
-    (index + 1).toString(),
-    item.brand.toString(),
-    item.company.toString(),
-    item.qty ? item.qty.toString() : "",
-    `₹${parseFloat(item.rate || 0).toFixed(2)}`,
-    item.splRate ? `₹${parseFloat(item.splRate).toFixed(2)}` : "-",
-    `${item.disc || 0}%`
-  ]);
-
-  // Title & info
+  // Header
   doc.setFontSize(16);
   doc.text("Ishwar Pharma - Purchase Order", 14, 15);
 
@@ -278,21 +267,30 @@ async function finalizeOrder() {
   doc.text(`Party: ${party}`, 14, 39);
   doc.text(`Place: ${place}`, 14, 46);
 
-  // Table without amount & total
+  // Table headings
+  const headers = [["Sr", "Brand", "Company", "Qty", "Rate", "Special Rate", "Disc%"]];
+
+  // Table rows
+  const rows = cart.map((item, index) => [
+    index + 1,
+    item.brand || "",
+    item.company || "",
+    item.qty || "",
+    `₹${parseFloat(item.rate || 0).toFixed(2)}`,
+    item.splRate ? `₹${parseFloat(item.splRate).toFixed(2)}` : "-",
+    `${item.disc || 0}%`
+  ]);
+
+  // Generate table
   doc.autoTable({
-    startY: 55,
-    head: [["Sr", "Brand", "Company", "Qty", "Rate", "Special Rate", "Disc%"]],
+    head: headers,
     body: rows,
-    styles: { fontSize: 10, halign: 'left' },
-    headStyles: { fillColor: [30, 144, 255], textColor: 255, halign: 'left' },
+    startY: 55,
+    styles: { fontSize: 10, halign: 'left', cellPadding: 2 },
+    headStyles: { fillColor: [0, 102, 204], textColor: 255, fontStyle: 'bold' },
     columnStyles: {
-      0: { cellWidth: 10 },
-      1: { cellWidth: 40 },
-      2: { cellWidth: 40 },
-      3: { cellWidth: 15 },
-      4: { cellWidth: 20 },
-      5: { cellWidth: 25 },
-      6: { cellWidth: 15 }
+      4: { textColor: [0, 0, 0], fontStyle: 'bold' }, // Rate
+      5: { textColor: [255, 0, 0], fontStyle: 'bold' } // Special Rate in red
     }
   });
 
