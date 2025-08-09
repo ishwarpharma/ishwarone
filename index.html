@@ -248,7 +248,6 @@ renderCart();
       renderCart();
     }
 
-
 async function finalizeOrder() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
@@ -258,60 +257,45 @@ async function finalizeOrder() {
   const party = document.getElementById("party").value;
   const place = document.getElementById("place").value;
 
-  let total = 0;
+  // Map table rows (no amount column)
+  const rows = cart.map((item, index) => [
+    (index + 1).toString(),
+    item.brand.toString(),
+    item.company.toString(),
+    item.qty ? item.qty.toString() : "",
+    `₹${parseFloat(item.rate || 0).toFixed(2)}`,
+    item.splRate ? `₹${parseFloat(item.splRate).toFixed(2)}` : "-",
+    `${item.disc || 0}%`
+  ]);
 
-  // Prepare table rows
-  const rows = cart.map((item, index) => {
-    const qty = item.qty || 0;
-    const qtyType = item.qtyType || "";
-    const rate = parseFloat(item.rate) || 0;
-    const splRate = item.splRate ? parseFloat(item.splRate) : null;
-    const disc = item.disc || 0;
-    const finalRate = splRate || rate * (1 - disc / 100);
-    const amt = qty * finalRate;
-    total += amt;
-
-    return [
-      (index + 1).toString(),
-      item.brand.toString(),
-      item.company.toString(),
-      `${qty} ${qtyType}`,
-      `₹${rate.toFixed(2)}`,
-      splRate ? `₹${splRate.toFixed(2)}` : "-",
-      `${disc}%`,
-      `₹${amt.toFixed(2)}`
-    ];
-  });
-
-  // Title and header info
+  // Title & info
   doc.setFontSize(16);
-  doc.setTextColor(0, 0, 150);
   doc.text("Ishwar Pharma - Purchase Order", 14, 15);
 
   doc.setFontSize(12);
-  doc.setTextColor(0, 0, 0);
   doc.text(`Date: ${date}`, 14, 25);
   doc.text(`Salesman: ${salesman}`, 14, 32);
   doc.text(`Party: ${party}`, 14, 39);
   doc.text(`Place: ${place}`, 14, 46);
 
-  // Table
+  // Table without amount & total
   doc.autoTable({
-    head: [["#", "Brand", "Company", "Qty", "Rate", "Special Rate", "Disc%", "Amount"]],
+    startY: 55,
+    head: [["Sr", "Brand", "Company", "Qty", "Rate", "Special Rate", "Disc%"]],
     body: rows,
-    startY: 52,
-    styles: { halign: "center" },
-    headStyles: { fillColor: [30, 144, 255], textColor: 255, fontStyle: "bold" },
-    bodyStyles: { textColor: 0 },
+    styles: { fontSize: 10, halign: 'left' },
+    headStyles: { fillColor: [30, 144, 255], textColor: 255, halign: 'left' },
+    columnStyles: {
+      0: { cellWidth: 10 },
+      1: { cellWidth: 40 },
+      2: { cellWidth: 40 },
+      3: { cellWidth: 15 },
+      4: { cellWidth: 20 },
+      5: { cellWidth: 25 },
+      6: { cellWidth: 15 }
+    }
   });
 
-  // Total
-  const finalY = doc.lastAutoTable.finalY + 10;
-  doc.setFontSize(14);
-  doc.setTextColor(200, 0, 0);
-  doc.text(`Grand Total: ₹${total.toFixed(2)}`, 14, finalY);
-
-  // Save
   doc.save("purchase_order.pdf");
 }
 
