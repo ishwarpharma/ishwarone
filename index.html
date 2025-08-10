@@ -217,20 +217,30 @@ div.onclick = () => {
       });
     }
 
-    function addToCart() {
-      const qty = +document.getElementById("qty").value;
-      const disc = +document.getElementById("disc").value;
-      const splRate = +document.getElementById("splRate").value;
-      const qtyType = document.getElementById("qtyType").value;
-      cart.push({ ...selectedProduct, qty, qtyType, disc, splRate });
-      document.getElementById("entryForm").style.display = "none";
-      document.getElementById("qty").value = "";
-      document.getElementById("disc").value = "";
-      document.getElementById("splRate").value = "";
-      document.getElementById("search").value = "";
-      document.getElementById("suggestions").innerHTML = "";      
-renderCart();
-    }
+
+function addToCart() {
+  const qty = document.getElementById("qty").value;
+  const disc = document.getElementById("disc").value;
+  const splRate = document.getElementById("splRate").value;
+  const pack = document.getElementById("pack").value; // get pack selection
+
+  cart.push({ 
+    ...selectedProduct, 
+    qty, 
+    disc, 
+    splRate, 
+    pack // save pack in cart object
+  });
+
+  document.getElementById("entryForm").style.display = "none";
+  document.getElementById("qty").value = "";
+  document.getElementById("disc").value = "";
+  document.getElementById("splRate").value = "";
+  document.getElementById("pack").value = "Units"; // reset to default if needed
+  document.getElementById("search").value = ""; // clear search for next item
+  
+  renderCart();
+}
 
     function renderCart() {
       const c = document.getElementById("cart");
