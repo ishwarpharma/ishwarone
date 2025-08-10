@@ -110,14 +110,10 @@
       <button onclick="nextScreen()">🚀 Start Ordering</button>
     </div>
 
-<div class="screen" id="screen2">
-  <label>🔍 Search Product:</label>
-  <div style="display:flex; align-items:center; gap:5px;">
-    <input type="text" id="search" oninput="filterProducts()" placeholder="Enter brand name and company name" style="flex:1;">
-    <button onclick="resetSearch()" style="padding:4px 8px; cursor:pointer;">❌</button>
-  </div>
-  <div id="suggestions"></div>
-</div>
+    <div class="screen" id="screen2">
+      <label>🔍 Search Product:</label>
+      <input type="text" id="search" oninput="filterProducts()" placeholder="Enter brand name and company name">
+      <div id="suggestions"></div>
 
 <div id="entryForm" style="display:none">
   <div id="rateInfo" style="font-weight:bold; margin-bottom:10px; color:#0055aa;"></div>
@@ -342,11 +338,6 @@ const rows = cart.map((item, index) => [
   });
 
   doc.save("purchase_order.pdf");
-}
-
-function resetSearch() {
-  document.getElementById("search").value = "";
-  filterProducts();
 }
 
   </script>
