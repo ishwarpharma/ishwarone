@@ -168,7 +168,8 @@
             brand: row[1],
             company: row[13],
             rate: row[12],
-            mrp: row[10]
+            mrp: row[10],
+            stock: row[15]
           });
         }
       });
@@ -204,8 +205,8 @@ function nextScreen() {
       matches.slice(0, 10).forEach(p => {
       const div = document.createElement("div");
       div.className = "product-card";
-      div.innerHTML = `${p.brand}   | ${p.company}   | <b style="color:red;">₹${parseFloat(p.rate).toFixed(2)}</b>   |  ₹${parseFloat(p.mrp).toFixed(2)}`;
-        
+      div.innerHTML = `${p.brand} | ${p.company} | <b style="color:red;">${parseFloat(p.rate).toFixed(2)}</b> | ${parseFloat(p.mrp).toFixed(2)} | Stock: ${p.stock || "-"}`;
+     
 div.onclick = () => {
   selectedProduct = p;
   document.getElementById("entryForm").style.display = "block";
