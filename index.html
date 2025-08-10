@@ -190,32 +190,54 @@ function nextScreen() {
   document.getElementById("screen1").classList.remove("active");
   document.getElementById("screen2").classList.add("active");
 }
-    function filterProducts() {
-      const input = document.getElementById("search").value.toLowerCase();
-     const query = input.toLowerCase();
-     const matches = stockData.filter(p => {
-     const fullText = `${p.brand} ${p.company}`.toLowerCase();
-      return fullText.includes(query);
-});
-      
 
-      const container = document.getElementById("suggestions");
-      container.innerHTML = "";
-      matches.slice(0, 10).forEach(p => {
-      const div = document.createElement("div");
-      div.className = "product-card";
-      div.innerHTML = `${p.brand}   | ${p.company}   | <b style="color:red;">₹${parseFloat(p.rate).toFixed(2)}</b>   |  ₹${parseFloat(p.mrp).toFixed(2)}`;
-        
-div.onclick = () => {
-  selectedProduct = p;
-  document.getElementById("entryForm").style.display = "block";
-  document.getElementById("rateInfo").innerHTML = `💰 <b>Rate:</b> ₹${p.rate} &nbsp;&nbsp; 🏷️ <b>MRP:</b> ₹${p.mrp}`;
+function filterProducts() {
+  const input = document.getElementById("search").value.toLowerCase().replace(/\s+/g, "");
+  if (input.length < 3) {
+    document.getElementById("suggestions").innerHTML = "";
+    return;
+  }
+
+  const matches = stockData
+    .map(p => {
+      const brand = p.brand.toLowerCase().replace(/\s+/g, "");
+      const company = p.company.toLowerCase().replace(/\s+/g, "");
+      const combined = brand + " " + company;
+
+      // check if input exists in brand or company
+      const isMatch = brand.includes(input) || company.includes(input) || combined.includes(input);
+
+      // calculate match score (longer matches rank higher)
+      let score = 0;
+      if (isMatch) {
+        score = Math.max(
+          brand.includes(input) ? input.length : 0,
+          company.includes(input) ? input.length : 0,
+          combined.includes(input) ? input.length : 0
+        );
+      }
+
+      return { ...p, score };
+    })
+    .filter(p => p.score > 0) // keep only matches
+    .sort((a, b) => b.score - a.score) // highest score first
+    .slice(0, 10); // limit to top 10
+
+  const container = document.getElementById("suggestions");
   container.innerHTML = "";
-  document.getElementById("search").value = `${p.brand} ${p.company}`;
-};
-        container.appendChild(div);
-      });
-    }
+  matches.forEach(p => {
+    const div = document.createElement("div");
+    div.className = "product-card";
+    div.textContent = `${p.brand} | ${p.company} | ${parseFloat(p.rate).toFixed(2)} | MRP ${parseFloat(p.mrp).toFixed(2)}`;
+    div.onclick = () => {
+      selectedProduct = p;
+      document.getElementById("entryForm").style.display = "block";
+      container.innerHTML = "";
+      document.getElementById("search").value = `${p.brand} ${p.company}`;
+    };
+    container.appendChild(div);
+  });
+}
 
 function addToCart() {
   try {
