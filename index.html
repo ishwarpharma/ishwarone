@@ -208,7 +208,9 @@ function nextScreen() {
      div.innerHTML = `
     <span style="display:inline-block; min-width:300px; text-align:left;">
     ${p.brand} | ${p.company} | 
-    <b style="color:red;">${Number(p.rate).toFixed(2)}</b> | ${Number(p.mrp).toFixed(2)} | Stock: ${p.stock || "-"}
+    <b style="color:red;">Rate: ${Number(p.rate).toFixed(2)}</b> | 
+    <b style="color:blue;">MRP: ${Number(p.mrp).toFixed(2)}</b> | 
+   <b style="color:green;">Stock: ${p.stock || "-"}</b>
     </span>
 `;
 
