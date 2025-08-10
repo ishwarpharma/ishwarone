@@ -190,42 +190,32 @@ function nextScreen() {
   document.getElementById("screen1").classList.remove("active");
   document.getElementById("screen2").classList.add("active");
 }
- 
-function filterProducts() {
-  const input = document.getElementById("search").value.toLowerCase().replace(/\s+/g, '');
-  if (input.length < 3) return; // start searching only after 3 chars
+    function filterProducts() {
+      const input = document.getElementById("search").value.toLowerCase();
+     const query = input.toLowerCase();
+     const matches = stockData.filter(p => {
+     const fullText = `${p.brand} ${p.company}`.toLowerCase();
+      return fullText.includes(query);
+});
+      
 
-  const matches = stockData.filter(p => {
-    const brandNoSpace = p.brand.toLowerCase().replace(/\s+/g, '');
-    const companyNoSpace = p.company.toLowerCase().replace(/\s+/g, '');
-    const combinedNoSpace = (p.brand + " " + p.company).toLowerCase().replace(/\s+/g, '');
-
-    return (
-      brandNoSpace.includes(input) ||
-      companyNoSpace.includes(input) ||
-      combinedNoSpace.includes(input) ||
-      input.includes(brandNoSpace) ||
-      input.includes(companyNoSpace)
-    );
-  });
-
-  const container = document.getElementById("suggestions");
-  container.innerHTML = "";
-  matches.forEach(p => {
-    const div = document.createElement("div");
-    div.className = "product-card";
-    div.innerHTML = `${p.brand} | ${p.company} | <b style="color:red;">${parseFloat(p.rate).toFixed(2)}</b> | ${parseFloat(p.mrp).toFixed(2)}`;
-
-    div.onclick = () => {
-      selectedProduct = p;
-      document.getElementById("entryForm").style.display = "block";
-      document.getElementById("rateInfo").innerHTML = `💰 <b>Rate:</b> ${p.rate} &nbsp;&nbsp; 🏷️ <b>MRP:</b> ${p.mrp}`;
+      const container = document.getElementById("suggestions");
       container.innerHTML = "";
-      document.getElementById("search").value = `${p.brand} ${p.company}`;
-    };
-    container.appendChild(div);
-  });
-}
+      matches.slice(0, 10).forEach(p => {
+      const div = document.createElement("div");
+      div.className = "product-card";
+      div.innerHTML = `${p.brand}   | ${p.company}   | <b style="color:red;">₹${parseFloat(p.rate).toFixed(2)}</b>   |  ₹${parseFloat(p.mrp).toFixed(2)}`;
+        
+div.onclick = () => {
+  selectedProduct = p;
+  document.getElementById("entryForm").style.display = "block";
+  document.getElementById("rateInfo").innerHTML = `💰 <b>Rate:</b> ₹${p.rate} &nbsp;&nbsp; 🏷️ <b>MRP:</b> ₹${p.mrp}`;
+  container.innerHTML = "";
+  document.getElementById("search").value = `${p.brand} ${p.company}`;
+};
+        container.appendChild(div);
+      });
+    }
 
 function addToCart() {
   try {
