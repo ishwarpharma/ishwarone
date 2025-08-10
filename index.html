@@ -217,29 +217,53 @@ div.onclick = () => {
       });
     }
 
-
 function addToCart() {
-  const qty = document.getElementById("qty").value;
-  const disc = document.getElementById("disc").value;
-  const splRate = document.getElementById("splRate").value;
-  const pack = document.getElementById("pack").value; // get pack selection
+  try {
+    // Basic validation
+    if (!selectedProduct) {
+      alert("Please select a product first.");
+      return;
+    }
 
-  cart.push({ 
-    ...selectedProduct, 
-    qty, 
-    disc, 
-    splRate, 
-    pack // save pack in cart object
-  });
+    const qtyRaw = document.getElementById("qty").value;
+    const qty = qtyRaw === "" ? "" : qtyRaw; // keep as string if empty or numeric string
+    if (!qty) {
+      // optional: require qty — if you want to allow blank qty remove this check
+      if (!confirm("Quantity is empty. Add item with empty quantity?")) return;
+    }
 
-  document.getElementById("entryForm").style.display = "none";
-  document.getElementById("qty").value = "";
-  document.getElementById("disc").value = "";
-  document.getElementById("splRate").value = "";
-  document.getElementById("pack").value = "Units"; // reset to default if needed
-  document.getElementById("search").value = ""; // clear search for next item
-  
-  renderCart();
+    const disc = document.getElementById("disc").value || "";
+    const splRate = document.getElementById("splRate").value || "";
+
+    // support both possible select ids: 'pack' or 'qtyType'
+    const packEl = document.getElementById("pack") || document.getElementById("qtyType");
+    const pack = packEl ? (packEl.value || "") : "";
+
+    // push into cart (keep values as entered, no parsing)
+    cart.push({
+      ...selectedProduct,
+      qty,
+      pack,
+      disc,
+      splRate
+    });
+
+    // Reset UI
+    document.getElementById("entryForm").style.display = "none";
+    document.getElementById("qty").value = "";
+    document.getElementById("disc").value = "";
+    document.getElementById("splRate").value = "";
+    if (packEl) packEl.value = packEl.querySelector("option") ? packEl.querySelector("option").value : "";
+    document.getElementById("search").value = "";
+    const suggestions = document.getElementById("suggestions");
+    if (suggestions) suggestions.innerHTML = "";
+
+    selectedProduct = null; // clear selection so user must choose next product explicitly
+    renderCart();
+  } catch (err) {
+    console.error("addToCart error:", err);
+    alert("Something went wrong while adding to cart. Open browser console for details.");
+  }
 }
 
     function renderCart() {
