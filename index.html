@@ -190,21 +190,62 @@ function nextScreen() {
   document.getElementById("screen1").classList.remove("active");
   document.getElementById("screen2").classList.add("active");
 }
-    function filterProducts() {
-      const input = document.getElementById("search").value.toLowerCase();
-     const query = input.toLowerCase();
-     const matches = stockData.filter(p => {
-     const fullText = `${p.brand} ${p.company}`.toLowerCase();
-      return fullText.includes(query);
-});
-      
+   
 
-      const container = document.getElementById("suggestions");
+function filterProducts() {
+  const rawInput = document.getElementById("search").value.toLowerCase();
+  const input = rawInput.replace(/\s+/g, ""); // remove spaces for matching
+  const container = document.getElementById("suggestions");
+
+  if (input.length < 3) {
+    container.innerHTML = "";
+    return;
+  }
+
+  const matches = stockData
+    .map(p => {
+      const brandRaw = p.brand.toLowerCase();
+      const companyRaw = p.company.toLowerCase();
+      const brand = brandRaw.replace(/\s+/g, "");
+      const company = companyRaw.replace(/\s+/g, "");
+      const combined = brand + " " + company;
+
+      const isMatch = brand.includes(input) || company.includes(input) || combined.includes(input);
+
+      let score = 0;
+      if (isMatch) {
+        score = Math.max(
+          brand.includes(input) ? input.length : 0,
+          company.includes(input) ? input.length : 0,
+          combined.includes(input) ? input.length : 0
+        );
+      }
+
+      return { ...p, brandRaw, companyRaw, score };
+    })
+    .filter(p => p.score > 0)
+    .sort((a, b) => b.score - a.score); // no limit now
+
+  container.innerHTML = "";
+
+  matches.forEach(p => {
+    const highlight = (text) => {
+      const regex = new RegExp(`(${rawInput})`, "ig");
+      return text.replace(regex, match => `<span style="color:red;font-weight:bold">${match}</span>`);
+    };
+
+    const div = document.createElement("div");
+    div.className = "product-card";
+    div.innerHTML = `${highlight(p.brandRaw)} | ${highlight(p.companyRaw)} | ${parseFloat(p.rate).toFixed(2)} | MRP ${parseFloat(p.mrp).toFixed(2)}`;
+    div.onclick = () => {
+      selectedProduct = p;
+      document.getElementById("entryForm").style.display = "block";
       container.innerHTML = "";
-      matches.slice(0, 10).forEach(p => {
-      const div = document.createElement("div");
-      div.className = "product-card";
-      div.innerHTML = `${p.brand}   | ${p.company}   | <b style="color:red;">₹${parseFloat(p.rate).toFixed(2)}</b>   |  ₹${parseFloat(p.mrp).toFixed(2)}`;
+      document.getElementById("search").value = `${p.brandRaw} ${p.companyRaw}`;
+    };
+    container.appendChild(div);
+  });
+}
         
 div.onclick = () => {
   selectedProduct = p;
