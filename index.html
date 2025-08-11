@@ -202,7 +202,7 @@ function nextScreen() {
 
       const container = document.getElementById("suggestions");
       container.innerHTML = "";
-      matches.slice(0, 200).forEach(p => {
+      matches.slice(0, 400).forEach(p => {
       const div = document.createElement("div");
       div.className = "product-card";
      div.innerHTML = `
@@ -347,5 +347,6 @@ const rows = cart.map((item, index) => [
 </body>
 
 </html>
+
 
 
