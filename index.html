@@ -111,9 +111,15 @@
     </div>
 
     <div class="screen" id="screen2">
-      <label>🔍 Search Product:</label>
-      <input type="text" id="search" oninput="filterProducts()" placeholder="Enter brand name and company name">
-      <div id="suggestions"></div>
+      
+<div class="screen" id="screen2">
+  <label>🔍 Search Product:</label>
+  <div style="display: flex; align-items: center;">
+    <input type="text" id="search" oninput="filterProducts()" placeholder="Enter brand name and company name" style="flex:1;">
+    <button onclick="document.getElementById('search').value=''; filterProducts();" style="margin-left:5px; background:red; color:white; border:none; padding:5px 10px; cursor:pointer;">X</button>
+  </div>
+  <div id="suggestions"></div>
+</div>
 
 <div id="entryForm" style="display:none">
   <div id="rateInfo" style="font-weight:bold; margin-bottom:10px; color:#0055aa;"></div>
@@ -347,6 +353,3 @@ const rows = cart.map((item, index) => [
 </body>
 
 </html>
-
-
-
