@@ -111,8 +111,17 @@
     </div>
 
     <div class="screen" id="screen2">
-      <label>🔍 Search Product:</label>
-      <input type="text" id="search" oninput="filterProducts()" placeholder="Enter brand name and company name">
+<div style="display: flex; align-items: center; gap: 5px;">
+  <input type="text" id="search" 
+         oninput="filterProducts()" 
+         placeholder="Enter brand name and company name" 
+         style="flex: 1; padding: 8px; font-size: 16px; border-radius: 4px; border: 1px solid #ccc;">
+  <button onclick="resetSearch()" 
+          style="width: 24px; height: 24px; background: red; color: white; 
+                 border: none; font-size: 12px; cursor: pointer; border-radius: 50%; line-height: 1;">
+    ✖
+  </button>
+</div>
       <div id="suggestions"></div>
 
 <div id="entryForm" style="display:none">
@@ -339,6 +348,12 @@ const rows = cart.map((item, index) => [
 
   doc.save("purchase_order.pdf");
 }
+
+function resetSearch() {
+  document.getElementById('search').value = '';
+  document.getElementById('suggestions').innerHTML = '';
+}
+
 
   </script>
 
