@@ -349,7 +349,9 @@ const rows = cart.map((item, index) => [
     }
   });
 
-  doc.save("purchase_order.pdf");
+const safeParty = party.replace(/[^a-z0-9]/gi, '_');  
+const safePlace = place.replace(/[^a-z0-9]/gi, '_');  
+doc.save(`${safeParty}_${safePlace}.pdf`);
 }
 
 function resetSearch() {
