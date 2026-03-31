@@ -350,13 +350,13 @@ fetch("batch.xlsx")
     j.forEach(r => {
       if (r[1]) {
         batchData.push({
-          product: r[1],
-          qty: Number(r[3]) || 0,
-          cost: Number(r[8]) || 0,
-          batch: r[16],
-          expiry: r[18]
-        });
-      }
+  product: r[1],
+  qty: Number(r[3]) || 0,
+  cost: Number(r[8]) || 0,
+  batch: String(r[16] || ""),
+  expiry: parseDate(r[18]).toLocaleDateString('en-GB')
+});
+         }
     });
   });
 
