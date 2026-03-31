@@ -130,20 +130,30 @@
 <div id="entryForm" style="display:none">
   <div id="rateInfo" style="font-weight:bold; margin-bottom:10px; color:#0055aa;"></div>
   <div class="row">
+
 <div>
   <label>Qty</label>
   <input type="number" inputmode="decimal" id="qty">
+
   <select id="qtyType">
     <option value="Units">Units</option>
     <option value="Box">Box</option>
     <option value="Case">Case</option>
   </select>
+
+  <!-- ✅ Button MUST be inside this same div -->
+ <button onclick="handleBatchKYC()" 
+        style="margin-top:5px; background-color:#fd7e14; color:white;">
+  📦 Batch KYC
+</button>
+  </div>
+
+<div>
+  <label>Discount %</label>
+  <input type="number" inputmode="decimal" id="disc">
 </div>
-    <div>
-      <label>Discount %</label>
-      <input type="number" inputmode="decimal" id="disc">
-    </div>
-    <div>
+ 
+<div>
       <label>Special Rate</label>
       <input type="number" inputmode="decimal" id="splRate">
     </div>
@@ -156,6 +166,39 @@
       <div id="cart"></div>
       <button onclick="finalizeOrder()">📥 Finalise & Download PDF</button>
     </div>
+
+  <!-- ✅ BATCH POPUP -->
+<div id="batchModal" style="
+  display:none;
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,0.6);
+  z-index:9999;
+">
+
+  <div style="
+    background:white;
+    margin:5% auto;
+    padding:15px;
+    width:95%;
+    max-height:80%;
+    overflow:auto;
+    border-radius:10px;
+  ">
+
+    <h3>📦 Batch Details</h3>
+
+    <div id="batchContent"></div>
+
+    <button onclick="closeBatchModal()" 
+            style="background:#dc3545; margin-top:10px;">
+      ❌ Close
+    </button>
+
+  </div>
+</div>
+  
   </main>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -193,12 +236,6 @@ function nextScreen() {
   const s = document.getElementById("salesman").value;
   const p = document.getElementById("party").value;
   const pl = document.getElementById("place").value;
-
-  if (!s || !p || !pl) {
-    if (!confirm("Some fields are empty. Do you want to continue just to view prices?")) {
-      return;
-    }
-  }
 
   document.getElementById("screen1").classList.remove("active");
   document.getElementById("screen2").classList.add("active");
@@ -244,7 +281,7 @@ function addToCart() {
       alert("Please select a product first.");
       return;
     }
-
+    
     const qtyRaw = document.getElementById("qty").value;
     const qty = qtyRaw === "" ? "" : qtyRaw; // keep as string if empty or numeric string
     if (!qty) {
@@ -285,7 +322,100 @@ function addToCart() {
     alert("Something went wrong while adding to cart. Open browser console for details.");
   }
 }
+    
+// ===== BATCH DATA =====
+let batchData = [];
 
+// Load batch.xlsx
+fetch("batch.xlsx")
+  .then(r => r.arrayBuffer())
+  .then(d => {
+    let wb = XLSX.read(d);
+    let j = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
+
+    j.forEach(r => {
+      if (r[1]) {
+        batchData.push({
+          product: r[1],
+          qty: Number(r[3]) || 0,
+          cost: Number(r[8]) || 0,
+          batch: r[16],
+          expiry: r[18]
+        });
+      }
+    });
+  });
+
+// Normalize
+function normalize(str) {
+  return (str || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+// Date parser
+function parseDate(e) {
+  if (!e) return new Date(0);
+  if (typeof e === "number") return new Date((e - 25569) * 86400000);
+  return new Date(e);
+}
+
+// ===== OPEN POPUP =====
+function handleBatchKYC() {
+  if (!selectedProduct) {
+    alert("Please select a product first");
+    return;
+  }
+
+  showBatchModal(selectedProduct.brand, selectedProduct.stock);
+}
+
+// ===== SHOW BATCH =====
+function showBatchModal(name, total) {
+
+  let today = new Date();
+
+  let batches = batchData
+    .filter(b =>
+      normalize(b.product) === normalize(name) &&
+      b.qty > 0 &&
+      parseDate(b.expiry) >= today
+    )
+    .sort((a, b) => parseDate(b.expiry) - parseDate(a.expiry));
+
+  let rem = total;
+  let final = [];
+
+  for (let b of batches) {
+    if (rem <= 0) break;
+    let use = Math.min(rem, b.qty);
+    final.push({ ...b, use });
+    rem -= use;
+  }
+
+  let html = `<table style="width:100%; border-collapse:collapse;">
+  <tr style="background:#1e90ff; color:white;">
+    <th>Qty</th><th>Batch</th><th>Expiry</th><th>Cost</th>
+  </tr>`;
+
+  final.forEach(b => {
+    html += `<tr>
+      <td style="color:green">${b.use}</td>
+      <td>${b.batch}</td>
+      <td style="color:red">${b.expiry}</td>
+      <td style="color:orange">₹${Number(b.cost).toFixed(2)}</td>
+    </tr>`;
+  });
+
+  html += "</table>";
+
+  document.getElementById("batchContent").innerHTML = html;
+  document.getElementById("batchModal").style.display = "block";
+}
+
+// ===== CLOSE =====
+function closeBatchModal() {
+  document.getElementById("batchModal").style.display = "none";
+}
+    
     function renderCart() {
       const c = document.getElementById("cart");
       c.innerHTML = "";
