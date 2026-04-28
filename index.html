@@ -254,40 +254,49 @@ function nextScreen() {
   document.getElementById("screen1").classList.remove("active");
   document.getElementById("screen2").classList.add("active");
 }
+    // Highlight matched tokens in a text string
     function highlightText(text, tokens) {
-      // Escape special regex chars in each token, then highlight
       let result = text;
       tokens.forEach(token => {
         if (!token) return;
         const escaped = token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const regex = new RegExp(`(${escaped})`, 'gi');
-        result = result.replace(regex, '<mark style="background:yellow;padding:0;">$1</mark>');
+        const regex = new RegExp('(' + escaped + ')', 'gi');
+        result = result.replace(regex, '<mark style="background:yellow;padding:0;font-weight:bold;">$1</mark>');
       });
       return result;
+    }
+
+    // Score a single field against a token based on where it matches
+    function scoreField(fieldLower, token, startPts, wordStartPts, containsPts) {
+      if (!fieldLower || !token) return 0;
+      // Starts with token → highest
+      if (fieldLower.startsWith(token)) return startPts;
+      // Any word in field starts with token
+      const words = fieldLower.split(/[\s\-\/\(]+/);
+      if (words.some(w => w.startsWith(token))) return wordStartPts;
+      // Anywhere contains token
+      if (fieldLower.includes(token)) return containsPts;
+      return 0;
     }
 
     function filterProducts() {
       const input = document.getElementById("search").value.trim();
       const container = document.getElementById("suggestions");
       container.innerHTML = "";
-
       if (!input) return;
 
-      // Split query into tokens (words)
       const tokens = input.toLowerCase().split(/\s+/).filter(Boolean);
 
-      // Score each product
       const scored = stockData.map(p => {
         const brand   = (p.brand   || "").toLowerCase();
         const company = (p.company || "").toLowerCase();
-        const pack    = (p.pack    || "").toLowerCase();
-        const full    = `${brand} ${company} ${pack}`;
 
         let score = 0;
         tokens.forEach(token => {
-          if (brand.includes(token))   score += 3; // brand match = highest weight
-          if (company.includes(token)) score += 2; // company match
-          if (pack.includes(token))    score += 1; // pack match
+          // Brand: starts-with = 5pts, word-start = 3pts, contains = 1pt
+          score += scoreField(brand,   token, 5, 3, 1);
+          // Company: starts-with = 3pts, word-start = 2pts, contains = 0.5pt
+          score += scoreField(company, token, 3, 2, 0.5);
         });
 
         return { p, score };
@@ -299,13 +308,8 @@ function nextScreen() {
         const div = document.createElement("div");
         div.className = "product-card";
 
-        // Highlight matched tokens in brand and company display
         const hlBrand   = highlightText(p.brand   || "", tokens);
         const hlCompany = highlightText(p.company || "", tokens);
-
-        // Top results (score >= max possible partial) get a subtle yellow card bg
-        const cardBg = score >= tokens.length * 3 ? "#fffde7" : "#fff";
-        div.style.background = cardBg;
 
         div.innerHTML = `
           <span style="display:inline-block; min-width:300px; text-align:left;">
