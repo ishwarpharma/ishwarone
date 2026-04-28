@@ -1,282 +1,30 @@
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ishwar Pharma Order Form</title>
-
-  <!-- Favicon (browser tab) -->
-<link rel="icon" type="image/png" href="favicon.png">
-
-<!-- iPhone / iPad home screen -->
-<link rel="apple-touch-icon" href="favicon.png">
-
-<!-- Android / Chrome -->
-<link rel="icon" sizes="192x192" href="favicon.png">
-<link rel="icon" sizes="512x512" href="favicon.png">
-
-<!-- Theme color (optional, matches your orange button) -->
-<meta name="theme-color" content="#fd7e14">
-  
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-      margin: 0;
-      padding: 0;
-      color: #333;
-    }
-
-    header {
-      background-color: #1e90ff;
-      color: white;
-      padding: 1rem;
-      text-align: center;
-      font-size: 1.5rem;
-    }
-
-    main {
-      padding: 1rem;
-    }
-
-    .screen {
-      display: none;
-    }
-
-    .active {
-      display: block;
-    }
-
-    input, button, select {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 1rem;
-    }
-
-    button {
-      background-color: #28a745;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #218838;
-    }
-
-    .product-card {
-      padding: 0.5rem;
-      background-color: #fff;
-      border: 1px solid #ddd;
-      margin-bottom: 0.5rem;
-      border-radius: 6px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .emoji {
-      font-size: 1.2rem;
-    }
-
-    .cart-item-actions button {
-      background: transparent;
-      color: #007bff;
-      border: none;
-      font-size: 1rem;
-    }
-
-    .cart-item-actions button:hover {
-      text-decoration: underline;
-    }
-
-    .row {
-      display: flex;
-      gap: 10px;
-    }
-
-    .row > div {
-      flex: 1;
-    }
-  </style>
-</head>
-
-<body>
-  <header>📝 Ishwar Pharma Order Form</header>
-  <main>
-    <div class="screen active" id="screen1">
-      <label>Date:</label>
-      <input type="text" id="date" readonly>
-      <label>Salesman Name:</label>
-      <input type="text" id="salesman">
-      <label>Party Name:</label>
-      <input type="text" id="party">
-      <label>Place/District:</label>
-      <input type="text" id="place">
-      <button onclick="nextScreen()">🚀 Start Ordering</button>
-    </div>
-
-    <div class="screen" id="screen2">
-<div style="display: flex; align-items: center; gap: 5px;">
-  <input type="text" id="search" 
-         oninput="filterProducts()" 
-         placeholder="Enter brand name and company name" 
-         style="flex: 1; padding: 8px; font-size: 16px; border-radius: 4px; border: 1px solid #ccc;">
-  
-  <button onclick="resetSearch()" 
-          style="width: 28px; height: 28px; background: red; color: white; 
-                 border: none; font-size: 18px; font-weight: bold; 
-                 cursor: pointer; border-radius: 50%; 
-                 display: flex; align-items: center; justify-content: center; padding: 0;">
-    ✖
-  </button>
-</div>
-      <div id="suggestions"></div>
-
-<div id="entryForm" style="display:none">
-  <div id="rateInfo" style="font-weight:bold; margin-bottom:10px; color:#0055aa;"></div>
-  <div class="row">
-
-<div>
-  <label>Qty</label>
-  <input type="number" inputmode="decimal" id="qty">
-
-  <select id="qtyType">
-    <option value="Units">Units</option>
-    <option value="Box">Box</option>
-    <option value="Case">Case</option>
-  </select>
-
-  <!-- ✅ Button MUST be inside this same div -->
- <button onclick="handleBatchKYC()" 
-        style="margin-top:5px; background-color:#fd7e14; color:white;">
-  📦 Batch KYC
-</button>
-  </div>
-
-<div>
-  <label>Discount %</label>
-  <input type="number" inputmode="decimal" id="disc">
-</div>
- 
-<div>
-      <label>Special Rate</label>
-      <input type="number" inputmode="decimal" id="splRate">
-    </div>
-  </div>
-  <button onclick="addToCart()">➕ Add to Cart</button>
-</div>
- 
-
-      <h3>🛒 Cart</h3>
-      <div id="cart"></div>
-      <button onclick="finalizeOrder()">📥 Finalise & Download PDF</button>
-    </div>
-
-  <!-- ✅ BATCH POPUP -->
-<div id="batchModal" style="
-  display:none;
-  position:fixed;
-  top:0; left:0;
-  width:100%; height:100%;
-  background:rgba(0,0,0,0.6);
-  z-index:9999;
-">
-
-  <div style="
-    background:white;
-    margin:5% auto;
-    padding:15px;
-    width:95%;
-    max-height:80%;
-    overflow:auto;
-    border-radius:10px;
-  ">
-
-    <h3>📦 Batch Details</h3>
-
-    <div id="batchContent"></div>
-
-    <button onclick="closeBatchModal()" 
-            style="background:#dc3545; margin-top:10px;">
-      ❌ Close
-    </button>
-
-  </div>
-</div>
-  
-  </main>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script>
-    let stockData = [];
-    let cart = [];
-    let selectedProduct = null;
-
-    document.getElementById("date").value = new Date().toISOString().split('T')[0];
-
-    async function fetchExcel() {
-      const response = await fetch("stock.xlsx");
-      const blob = await response.blob();
-      const data = await blob.arrayBuffer();
-      const workbook = XLSX.read(data);
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-      json.forEach(row => {
-        if (row[1] && row[13] && row[12] && row[10]) {
-          stockData.push({
-            brand: row[1],
-            company: row[13],
-            rate: row[12],
-            mrp: row[10],
-            stock: row[3]
-          });
-        }
-      });
-    }
-
-    fetchExcel();
-
-function nextScreen() {
-  const s = document.getElementById("salesman").value;
-  const p = document.getElementById("party").value;
-  const pl = document.getElementById("place").value;
-
-  document.getElementById("screen1").classList.remove("active");
-  document.getElementById("screen2").classList.add("active");
-}
-    // Highlight matched tokens in a text string
     function highlightText(text, tokens) {
-      let result = text;
+      let result = String(text);
       tokens.forEach(token => {
         if (!token) return;
-        const escaped = token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const regex = new RegExp('(' + escaped + ')', 'gi');
-        result = result.replace(regex, '<mark style="background:yellow;padding:0;font-weight:bold;">$1</mark>');
+        const esc = token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        result = result.replace(new RegExp('(' + esc + ')', 'gi'),
+          '<mark style="background:yellow;padding:0;font-weight:bold;">$1</mark>');
       });
       return result;
     }
 
-    // Score a single field against a token based on where it matches
-    function scoreField(fieldLower, token, startPts, wordStartPts, containsPts) {
-      if (!fieldLower || !token) return 0;
-      // Starts with token → highest
-      if (fieldLower.startsWith(token)) return startPts;
-      // Any word in field starts with token
-      const words = fieldLower.split(/[\s\-\/\(]+/);
-      if (words.some(w => w.startsWith(token))) return wordStartPts;
-      // Anywhere contains token
-      if (fieldLower.includes(token)) return containsPts;
-      return 0;
+    function scoreToken(brand, company, token) {
+      let score = 0, matched = false;
+      if (brand.startsWith(token)) { score += 10; matched = true; }
+      else {
+        const bw = brand.split(/[\s\-\/\(]+/);
+        if (bw.some(w => w && w.startsWith(token))) { score += 5; matched = true; }
+        else if (brand.includes(token)) { score += 1; matched = true; }
+      }
+      if (company.startsWith(token)) { score += 4; matched = true; }
+      else {
+        const cw = company.split(/[\s\-\/\(]+/);
+        if (cw.some(w => w && w.startsWith(token))) { score += 2; matched = true; }
+        else if (company.includes(token)) { score += 0.5; matched = true; }
+      }
+      return [score, matched];
     }
 
     function filterProducts() {
@@ -290,267 +38,37 @@ function nextScreen() {
       const scored = stockData.map(p => {
         const brand   = (p.brand   || "").toLowerCase();
         const company = (p.company || "").toLowerCase();
-
-        let score = 0;
-        tokens.forEach(token => {
-          // Brand: starts-with = 5pts, word-start = 3pts, contains = 1pt
-          score += scoreField(brand,   token, 5, 3, 1);
-          // Company: starts-with = 3pts, word-start = 2pts, contains = 0.5pt
-          score += scoreField(company, token, 3, 2, 0.5);
-        });
-
-        return { p, score };
+        let totalScore = 0, allMatched = true;
+        for (const token of tokens) {
+          const [s, matched] = scoreToken(brand, company, token);
+          totalScore += s;
+          if (!matched) allMatched = false;
+        }
+        if (allMatched) totalScore += 50;
+        return { p, score: totalScore };
       })
       .filter(x => x.score > 0)
       .sort((a, b) => b.score - a.score);
 
-      scored.slice(0, 200).forEach(({ p, score }) => {
+      scored.slice(0, 200).forEach(({ p }) => {
         const div = document.createElement("div");
         div.className = "product-card";
-
         const hlBrand   = highlightText(p.brand   || "", tokens);
         const hlCompany = highlightText(p.company || "", tokens);
-
-        div.innerHTML = `
-          <span style="display:inline-block; min-width:300px; text-align:left;">
-            ${hlBrand} | ${hlCompany} |
-            <b style="color:red;">Rate: ${Number(p.rate).toFixed(2)}</b> |
-            <b style="color:blue;">MRP: ${Number(p.mrp).toFixed(2)}</b> |
-            <b style="color:green;">Stock: ${p.stock || "-"}</b>
-          </span>`;
-
+        div.innerHTML = `<span style="display:inline-block;min-width:300px;text-align:left;">
+          ${hlBrand} | ${hlCompany} |
+          <b style="color:red;">Rate: ${Number(p.rate).toFixed(2)}</b> |
+          <b style="color:blue;">MRP: ${Number(p.mrp).toFixed(2)}</b> |
+          <b style="color:green;">Stock: ${p.stock || "-"}</b>
+        </span>`;
         div.onclick = () => {
           selectedProduct = p;
           document.getElementById("entryForm").style.display = "block";
-          document.getElementById("rateInfo").innerHTML = `💰 <b>Rate:</b> ₹${p.rate} &nbsp;&nbsp; 🏷️ <b>MRP:</b> ₹${p.mrp}`;
+          document.getElementById("rateInfo").innerHTML =
+            `\u{1F4B0} <b>Rate:</b> \u20B9${p.rate} &nbsp;&nbsp; \u{1F3F7}\uFE0F <b>MRP:</b> \u20B9${p.mrp}`;
           container.innerHTML = "";
           document.getElementById("search").value = `${p.brand} | ${p.company}`;
         };
-
         container.appendChild(div);
       });
     }
-
-function addToCart() {
-  try {
-    // Basic validation
-    if (!selectedProduct) {
-      alert("Please select a product first.");
-      return;
-    }
-    
-    const qtyRaw = document.getElementById("qty").value;
-    const qty = qtyRaw === "" ? "" : qtyRaw; // keep as string if empty or numeric string
-    if (!qty) {
-      // optional: require qty — if you want to allow blank qty remove this check
-      if (!confirm("Quantity is empty. Add item with empty quantity?")) return;
-    }
-
-    const disc = document.getElementById("disc").value || "";
-    const splRate = document.getElementById("splRate").value || "";
-
-    // support both possible select ids: 'pack' or 'qtyType'
-    const packEl = document.getElementById("pack") || document.getElementById("qtyType");
-    const pack = packEl ? (packEl.value || "") : "";
-
-    // push into cart (keep values as entered, no parsing)
-    cart.push({
-      ...selectedProduct,
-      qty,
-      pack,
-      disc,
-      splRate
-    });
-
-    // Reset UI
-    document.getElementById("entryForm").style.display = "none";
-    document.getElementById("qty").value = "";
-    document.getElementById("disc").value = "";
-    document.getElementById("splRate").value = "";
-    if (packEl) packEl.value = packEl.querySelector("option") ? packEl.querySelector("option").value : "";
-    document.getElementById("search").value = "";
-    const suggestions = document.getElementById("suggestions");
-    if (suggestions) suggestions.innerHTML = "";
-
-    selectedProduct = null; // clear selection so user must choose next product explicitly
-    renderCart();
-  } catch (err) {
-    console.error("addToCart error:", err);
-    alert("Something went wrong while adding to cart. Open browser console for details.");
-  }
-}
-    
-// ===== BATCH DATA =====
-let batchData = [];
-
-// Load batch.xlsx
-fetch("batch.xlsx")
-  .then(r => r.arrayBuffer())
-  .then(d => {
-    let wb = XLSX.read(d);
-    let j = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
-
-    j.forEach(r => {
-      if (r[1]) {
-        batchData.push({
-  product: r[1],
-  qty: Number(r[3]) || 0,
-  cost: Number(r[8]) || 0,
-  batch: String(r[16] || ""),
-  expiry: parseDate(r[18]).toLocaleDateString('en-GB')
-});
-         }
-    });
-  });
-
-// Normalize
-function normalize(str) {
-  return (str || "").toLowerCase().replace(/[^a-z0-9]/g, "");
-}
-
-// Date parser
-function parseDate(e) {
-  if (!e) return new Date(0);
-  if (typeof e === "number") return new Date((e - 25569) * 86400000);
-  return new Date(e);
-}
-
-// ===== OPEN POPUP =====
-function handleBatchKYC() {
-  if (!selectedProduct) {
-    alert("Please select a product first");
-    return;
-  }
-
-  showBatchModal(selectedProduct.brand, selectedProduct.stock);
-}
-
-// ===== SHOW BATCH =====
-function showBatchModal(name, total) {
-
-  let today = new Date();
-
-  let batches = batchData
-    .filter(b =>
-      normalize(b.product) === normalize(name) &&
-      b.qty > 0 &&
-      parseDate(b.expiry) >= today
-    )
-    .sort((a, b) => parseDate(b.expiry) - parseDate(a.expiry));
-
-  let rem = total;
-  let final = [];
-
-  for (let b of batches) {
-    if (rem <= 0) break;
-    let use = Math.min(rem, b.qty);
-    final.push({ ...b, use });
-    rem -= use;
-  }
-
-  let html = `<table style="width:100%; border-collapse:collapse;">
-  <tr style="background:#1e90ff; color:white;">
-    <th>Qty</th><th>Batch</th><th>Expiry</th><th>Cost</th>
-  </tr>`;
-
-  final.forEach(b => {
-    html += `<tr>
-      <td style="color:green">${b.use}</td>
-      <td>${b.batch}</td>
-      <td style="color:red">${b.expiry}</td>
-      <td style="color:orange">₹${Number(b.cost).toFixed(2)}</td>
-    </tr>`;
-  });
-
-  html += "</table>";
-
-  document.getElementById("batchContent").innerHTML = html;
-  document.getElementById("batchModal").style.display = "block";
-}
-
-// ===== CLOSE =====
-function closeBatchModal() {
-  document.getElementById("batchModal").style.display = "none";
-}
-    
-    function renderCart() {
-      const c = document.getElementById("cart");
-      c.innerHTML = "";
-      cart.forEach((item, index) => {
-        const div = document.createElement("div");
-        div.className = "product-card";
-        div.innerHTML = `${index + 1}. ${item.brand} (${item.company}) - Qty: ${item.qty} ${item.qtyType || ''} | Rate: ₹${item.rate} | Spl: ₹${item.splRate || "-"} | Disc: ${item.disc || 0}% <span class='cart-item-actions'><button onclick='removeItem(${index})'>❌</button></span>`;
-        c.appendChild(div);
-      });
-    }
-
-    function removeItem(i) {
-      cart.splice(i, 1);
-      renderCart();
-    }
-
-async function finalizeOrder() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-
-  const date = document.getElementById("date").value;
-  const salesman = document.getElementById("salesman").value;
-  const party = document.getElementById("party").value;
-  const place = document.getElementById("place").value;
-
-  // Header
-  doc.setFontSize(16);
-  doc.text("Ishwar Pharma - Purchase Order", 14, 15);
-
-  doc.setFontSize(12);
-  doc.text(`Date: ${date}`, 14, 25);
-  doc.text(`Salesman: ${salesman}`, 14, 32);
-  doc.text(`Party: ${party}`, 14, 39);
-  doc.text(`Place: ${place}`, 14, 46);
-
-  // Table headings
-  const headers = [["Sr", "Brand", "Company", "Qty", "Rate", "Special Rate", "Disc%"]];
-
-// Table rows
-const rows = cart.map((item, index) => [
-  index + 1,
-  item.brand || "",
-  item.company || "",
-  (item.qty || "") + " " + (item.pack || ""),
-  item.rate ? Number(item.rate).toFixed(2) : "",
-  item.splRate ? Number(item.splRate).toFixed(2) : "-",
-  (item.disc || 0) + "%"
-]);
-  
-
-  // Generate table
-  doc.autoTable({
-    head: headers,
-    body: rows,
-    startY: 55,
-    styles: { fontSize: 10, halign: 'left', cellPadding: 2 },
-    headStyles: { fillColor: [0, 102, 204], textColor: 255, fontStyle: 'bold' },
-    columnStyles: {
-      4: { textColor: [0, 0, 0], fontStyle: 'bold' }, // Rate
-      5: { textColor: [255, 0, 0], fontStyle: 'bold' } // Special Rate in red
-    }
-  });
-
-const safeParty = party.replace(/[^a-z0-9]/gi, '_');  
-const safePlace = place.replace(/[^a-z0-9]/gi, '_');  
-doc.save(`${safeParty}_${safePlace}.pdf`);
-}
-
-function resetSearch() {
-  document.getElementById('search').value = '';
-  document.getElementById('suggestions').innerHTML = '';
-}
-
-
-  </script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-
-</body>
-
-</html>
