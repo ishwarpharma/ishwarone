@@ -254,36 +254,75 @@ function nextScreen() {
   document.getElementById("screen1").classList.remove("active");
   document.getElementById("screen2").classList.add("active");
 }
-    function filterProducts() {
-      const input = document.getElementById("search").value.toLowerCase();
-     const query = input.toLowerCase();
-     const matches = stockData.filter(p => {
-     const fullText = `${p.brand} ${p.company}`.toLowerCase();
-      return fullText.includes(query);
-});
-      
+    function highlightText(text, tokens) {
+      // Escape special regex chars in each token, then highlight
+      let result = text;
+      tokens.forEach(token => {
+        if (!token) return;
+        const escaped = token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`(${escaped})`, 'gi');
+        result = result.replace(regex, '<mark style="background:yellow;padding:0;">$1</mark>');
+      });
+      return result;
+    }
 
+    function filterProducts() {
+      const input = document.getElementById("search").value.trim();
       const container = document.getElementById("suggestions");
       container.innerHTML = "";
-      matches.slice(0, 400).forEach(p => {
-      const div = document.createElement("div");
-      div.className = "product-card";
-     div.innerHTML = `
-    <span style="display:inline-block; min-width:300px; text-align:left;">
-    ${p.brand} | ${p.company} | 
-    <b style="color:red;">Rate: ${Number(p.rate).toFixed(2)}</b> | 
-    <b style="color:blue;">MRP: ${Number(p.mrp).toFixed(2)}</b> | 
-   <b style="color:green;">Stock: ${p.stock || "-"}</b>
-    </span>
-`;
 
-div.onclick = () => {
-  selectedProduct = p;
-  document.getElementById("entryForm").style.display = "block";
-  document.getElementById("rateInfo").innerHTML = `💰 <b>Rate:</b> ₹${p.rate} &nbsp;&nbsp; 🏷️ <b>MRP:</b> ₹${p.mrp}`;
-  container.innerHTML = "";
-  document.getElementById("search").value = `${p.brand} ${p.company}`;
-};
+      if (!input) return;
+
+      // Split query into tokens (words)
+      const tokens = input.toLowerCase().split(/\s+/).filter(Boolean);
+
+      // Score each product
+      const scored = stockData.map(p => {
+        const brand   = (p.brand   || "").toLowerCase();
+        const company = (p.company || "").toLowerCase();
+        const pack    = (p.pack    || "").toLowerCase();
+        const full    = `${brand} ${company} ${pack}`;
+
+        let score = 0;
+        tokens.forEach(token => {
+          if (brand.includes(token))   score += 3; // brand match = highest weight
+          if (company.includes(token)) score += 2; // company match
+          if (pack.includes(token))    score += 1; // pack match
+        });
+
+        return { p, score };
+      })
+      .filter(x => x.score > 0)
+      .sort((a, b) => b.score - a.score);
+
+      scored.slice(0, 200).forEach(({ p, score }) => {
+        const div = document.createElement("div");
+        div.className = "product-card";
+
+        // Highlight matched tokens in brand and company display
+        const hlBrand   = highlightText(p.brand   || "", tokens);
+        const hlCompany = highlightText(p.company || "", tokens);
+
+        // Top results (score >= max possible partial) get a subtle yellow card bg
+        const cardBg = score >= tokens.length * 3 ? "#fffde7" : "#fff";
+        div.style.background = cardBg;
+
+        div.innerHTML = `
+          <span style="display:inline-block; min-width:300px; text-align:left;">
+            ${hlBrand} | ${hlCompany} |
+            <b style="color:red;">Rate: ${Number(p.rate).toFixed(2)}</b> |
+            <b style="color:blue;">MRP: ${Number(p.mrp).toFixed(2)}</b> |
+            <b style="color:green;">Stock: ${p.stock || "-"}</b>
+          </span>`;
+
+        div.onclick = () => {
+          selectedProduct = p;
+          document.getElementById("entryForm").style.display = "block";
+          document.getElementById("rateInfo").innerHTML = `💰 <b>Rate:</b> ₹${p.rate} &nbsp;&nbsp; 🏷️ <b>MRP:</b> ₹${p.mrp}`;
+          container.innerHTML = "";
+          document.getElementById("search").value = `${p.brand} | ${p.company}`;
+        };
+
         container.appendChild(div);
       });
     }
