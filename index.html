@@ -254,36 +254,50 @@ function nextScreen() {
   document.getElementById("screen1").classList.remove("active");
   document.getElementById("screen2").classList.add("active");
 }
-    function filterProducts() {
-      const input = document.getElementById("search").value.toLowerCase();
-     const query = input.toLowerCase();
-     const matches = stockData.filter(p => {
-     const fullText = `${p.brand} ${p.company}`.toLowerCase();
-      return fullText.includes(query);
-});
-      
+    function highlightText(text, token) {
+      if (!token) return String(text);
+      const esc = token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      return String(text).replace(new RegExp('(' + esc + ')', 'gi'),
+        '<mark style="background:yellow;padding:0;font-weight:bold;">$1</mark>');
+    }
 
+    function filterProducts() {
+      const input = document.getElementById("search").value.trim();
       const container = document.getElementById("suggestions");
       container.innerHTML = "";
-      matches.slice(0, 400).forEach(p => {
-      const div = document.createElement("div");
-      div.className = "product-card";
-     div.innerHTML = `
-    <span style="display:inline-block; min-width:300px; text-align:left;">
-    ${p.brand} | ${p.company} | 
-    <b style="color:red;">Rate: ${Number(p.rate).toFixed(2)}</b> | 
-    <b style="color:blue;">MRP: ${Number(p.mrp).toFixed(2)}</b> | 
-   <b style="color:green;">Stock: ${p.stock || "-"}</b>
-    </span>
-`;
+      if (!input) return;
 
-div.onclick = () => {
-  selectedProduct = p;
-  document.getElementById("entryForm").style.display = "block";
-  document.getElementById("rateInfo").innerHTML = `💰 <b>Rate:</b> ₹${p.rate} &nbsp;&nbsp; 🏷️ <b>MRP:</b> ₹${p.mrp}`;
-  container.innerHTML = "";
-  document.getElementById("search").value = `${p.brand} ${p.company}`;
-};
+      const parts = input.toLowerCase().split(/\s+/).filter(Boolean);
+      const brandToken   = parts[0] || "";   // first word → brand must START with this
+      const companyToken = parts[1] || "";   // second word → company must START with this
+
+      const matches = stockData.filter(p => {
+        const brand   = (p.brand   || "").toLowerCase();
+        const company = (p.company || "").toLowerCase();
+        if (!brand.startsWith(brandToken)) return false;
+        if (companyToken && !company.startsWith(companyToken)) return false;
+        return true;
+      });
+
+      matches.slice(0, 200).forEach(p => {
+        const div = document.createElement("div");
+        div.className = "product-card";
+        const hlBrand   = highlightText(p.brand   || "", brandToken);
+        const hlCompany = highlightText(p.company || "", companyToken);
+        div.innerHTML = `<span style="display:inline-block;min-width:300px;text-align:left;">
+          ${hlBrand} | ${hlCompany} |
+          <b style="color:red;">Rate: ${Number(p.rate).toFixed(2)}</b> |
+          <b style="color:blue;">MRP: ${Number(p.mrp).toFixed(2)}</b> |
+          <b style="color:green;">Stock: ${p.stock || "-"}</b>
+        </span>`;
+        div.onclick = () => {
+          selectedProduct = p;
+          document.getElementById("entryForm").style.display = "block";
+          document.getElementById("rateInfo").innerHTML =
+            `\u{1F4B0} <b>Rate:</b> \u20B9${p.rate} &nbsp;&nbsp; \u{1F3F7}\uFE0F <b>MRP:</b> \u20B9${p.mrp}`;
+          container.innerHTML = "";
+          document.getElementById("search").value = `${p.brand} | ${p.company}`;
+        };
         container.appendChild(div);
       });
     }
