@@ -915,8 +915,28 @@
             Cart <span class="cart-count" id="cartCount">0</span>
           </div>
           <div id="cart"></div>
-          <button class="btn btn-green" onclick="finalizeOrder()" style="margin-top:0.5rem;">
-            📥 Finalise &amp; Download PDF
+
+          <!-- Share options (revealed on Finalise tap) -->
+          <div id="shareOptions" style="display:none; margin-top:0.75rem;">
+            <div style="font-size:0.7rem; font-weight:600; text-transform:uppercase; letter-spacing:0.07em; color:var(--ink3); margin-bottom:0.5rem;">Send order as</div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn" onclick="sendWhatsApp()" style="flex:1; background:#25D366; color:white; margin:0; padding:0.7rem 0.4rem; font-size:0.8rem;">
+                📱 WhatsApp
+              </button>
+              <button class="btn btn-green" onclick="finalizeOrder()" style="flex:1; margin:0; padding:0.7rem 0.4rem; font-size:0.8rem;">
+                📄 PDF
+              </button>
+              <button class="btn btn-outline" onclick="copyOrderText()" style="flex:1; margin:0; padding:0.7rem 0.4rem; font-size:0.8rem;">
+                📋 Copy
+              </button>
+            </div>
+            <div id="copyConfirm" style="display:none; text-align:center; font-size:0.78rem; color:var(--green); margin-top:6px; font-weight:600;">
+              ✓ Copied to clipboard!
+            </div>
+          </div>
+
+          <button class="btn btn-saffron" id="finaliseBtn" onclick="toggleShareOptions()" style="margin-top:0.6rem;">
+            ✓ Finalise Order
           </button>
         </div>
 
@@ -1232,6 +1252,11 @@
       selectedProduct = null;
       resetSearch();
       renderCart();
+      // Auto-scroll search box into view so user can keep adding
+      setTimeout(() => {
+        const s = document.getElementById('search');
+        if (s) s.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
     } catch(err) { console.error(err); alert('Something went wrong.'); }
   }
 
@@ -1273,6 +1298,9 @@
     document.getElementById('cartSection').style.display    = 'none';
     document.getElementById('modePillCheck').style.display  = 'none';
     document.getElementById('modePillOrder').style.display  = 'none';
+    document.getElementById('shareOptions').style.display   = 'none';
+    const fb = document.getElementById('finaliseBtn');
+    if (fb) { fb.textContent = '✓ Finalise Order'; fb.style.background = 'var(--saffron)'; }
     closeBatchModal();
 
     // Go back to screen 1
@@ -1323,6 +1351,70 @@
 
   function closeBatchModal() {
     document.getElementById('batchModal').classList.remove('open');
+  }
+
+  /* ── Share helpers ── */
+  function buildOrderText() {
+    const date     = document.getElementById('date').value;
+    const salesman = document.getElementById('salesman').value;
+    const party    = document.getElementById('party').value;
+    const place    = document.getElementById('place').value;
+
+    const dayName = new Date().toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'short', year:'numeric' });
+    let msg = '';
+    msg += '🏪 *ISHWAR PHARMA ORDER*\n';
+    msg += '📅 ' + dayName + '\n';
+    msg += '👤 Salesman: ' + salesman + '\n';
+    msg += '🏬 Party: ' + party + '\n';
+    msg += '📍 Place: ' + place + '\n';
+    msg += '─────────────────────\n';
+    cart.forEach((item, i) => {
+      msg += (i+1) + '. *' + item.brand + '*\n';
+      msg += '   ' + item.company + '\n';
+      msg += '   Qty: ' + item.qty + ' ' + (item.pack||'');
+      msg += ' | Rate: ₹' + Number(item.rate).toFixed(2);
+      if (item.splRate) msg += ' → Spl: ₹' + Number(item.splRate).toFixed(2);
+      if (item.disc)    msg += ' | Disc: ' + item.disc + '%';
+      msg += '\n';
+    });
+    msg += '─────────────────────\n';
+    msg += 'Total items: ' + cart.length;
+    return msg;
+  }
+
+  function toggleShareOptions() {
+    if (cart.length === 0) { alert('Cart is empty.'); return; }
+    const el = document.getElementById('shareOptions');
+    const btn = document.getElementById('finaliseBtn');
+    const open = el.style.display === 'none';
+    el.style.display = open ? 'block' : 'none';
+    btn.textContent = open ? '✕ Cancel' : '✓ Finalise Order';
+    btn.style.background = open ? 'var(--ink3)' : 'var(--saffron)';
+    if (open) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function sendWhatsApp() {
+    if (cart.length === 0) { alert('Cart is empty.'); return; }
+    const text = buildOrderText();
+    const encoded = encodeURIComponent(text);
+    window.open('https://wa.me/?text=' + encoded, '_blank');
+  }
+
+  async function copyOrderText() {
+    if (cart.length === 0) { alert('Cart is empty.'); return; }
+    const text = buildOrderText().replace(/\*/g, '');  // plain text, no bold markers
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch(e) {
+      // Fallback for older browsers
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta);
+    }
+    const conf = document.getElementById('copyConfirm');
+    conf.style.display = 'block';
+    setTimeout(() => conf.style.display = 'none', 2500);
   }
 
   /* ── PDF ── */
