@@ -769,7 +769,21 @@
           <div class="app-header-name" id="headerName">—</div>
           <div class="app-header-date" id="headerDate">—</div>
         </div>
-        <div class="app-header-avatar" id="headerAvatar">—</div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button onclick="fullReset()" title="New order — clear everything" style="
+            background: rgba(255,255,255,0.18);
+            border: 1.5px solid rgba(255,255,255,0.35);
+            color: white;
+            border-radius: 10px;
+            padding: 5px 11px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            cursor: pointer;
+            letter-spacing: 0.03em;
+            width: auto; margin: 0;
+          ">↺ New</button>
+          <div class="app-header-avatar" id="headerAvatar">—</div>
+        </div>
       </div>
     </div>
 
@@ -1239,6 +1253,35 @@
   }
 
   function removeItem(i) { cart.splice(i, 1); renderCart(); }
+
+  function fullReset() {
+    // Clear all state
+    cart = [];
+    selectedProduct = null;
+    appMode = 'order';
+
+    // Clear form fields
+    document.getElementById('party').value = '';
+    document.getElementById('place').value  = '';
+
+    // Reset search screen
+    resetSearch();
+
+    // Hide any open panels
+    document.getElementById('entryForm').style.display      = 'none';
+    document.getElementById('checkEntryForm').style.display = 'none';
+    document.getElementById('cartSection').style.display    = 'none';
+    document.getElementById('modePillCheck').style.display  = 'none';
+    document.getElementById('modePillOrder').style.display  = 'none';
+    closeBatchModal();
+
+    // Go back to screen 1
+    document.getElementById('appScreen2').classList.remove('active');
+    document.getElementById('appScreen1').classList.add('active');
+
+    // Refresh cart display so count resets
+    renderCart();
+  }
 
   /* ── Batch modal ── */
   function handleBatchKYC() {
