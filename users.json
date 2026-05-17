@@ -1,0 +1,7 @@
+[
+  { "name": "Umesh",    "pin": "11223344", "companies": ["Alkem"] },
+  { "name": "Prajjwal", "pin": "22334455", "companies": ["Alkem"] },
+  { "name": "Vijay",    "pin": "33445566", "companies": ["Theon"] },
+  { "name": "Vinayak",  "pin": "44556677", "companies": ["Cadila"] },
+  { "name": "Pandit",   "pin": "00000000", "companies": "ALL" }
+]

@@ -1,527 +1,647 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ishwar Pharma Order Form</title>
 
-  <!-- Favicon (browser tab) -->
-<link rel="icon" type="image/png" href="favicon.png">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e90ff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="IshwarPharma">
 
-<!-- iPhone / iPad home screen -->
-<link rel="apple-touch-icon" href="favicon.png">
-
-<!-- Android / Chrome -->
-<link rel="icon" sizes="192x192" href="favicon.png">
-<link rel="icon" sizes="512x512" href="favicon.png">
-
-<!-- Theme color (optional, matches your orange button) -->
-<meta name="theme-color" content="#fd7e14">
-  
   <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
       font-family: Arial, sans-serif;
       background: #f4f6f8;
-      margin: 0;
-      padding: 0;
       color: #333;
+      min-height: 100vh;
     }
+
+    .screen { display: none; }
+    .screen.active { display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* ── INSTALL WALL ── */
+    #installWall {
+      background: linear-gradient(160deg, #0d47a1 0%, #1e90ff 60%, #29b6f6 100%);
+      color: white;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem 1.5rem;
+    }
+    #installWall .logo { font-size: 4rem; margin-bottom: 0.5rem; }
+    #installWall h1 { font-size: 1.7rem; font-weight: 700; margin-bottom: 0.4rem; }
+    #installWall p.sub { font-size: 1rem; opacity: 0.85; margin-bottom: 2rem; }
+
+    .install-card {
+      background: rgba(255,255,255,0.15);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      width: 100%;
+      max-width: 360px;
+    }
+    .install-card h2 { font-size: 1.1rem; margin-bottom: 1rem; }
+
+    #installBtn {
+      background: white;
+      color: #1e90ff;
+      font-size: 1.1rem;
+      font-weight: 700;
+      padding: 0.9rem 2rem;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      width: 100%;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    #installBtn:active { opacity: 0.85; }
+
+    .ios-steps { text-align: left; list-style: none; }
+    .ios-steps li {
+      display: flex; align-items: flex-start; gap: 0.7rem;
+      margin-bottom: 0.9rem; font-size: 0.95rem; line-height: 1.4;
+    }
+    .ios-steps li .num {
+      background: white; color: #1e90ff; font-weight: 700;
+      border-radius: 50%; width: 26px; height: 26px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; font-size: 0.85rem;
+    }
+
+    /* ── PIN SCREEN ── */
+    #pinScreen {
+      background: linear-gradient(160deg, #0d47a1 0%, #1565c0 100%);
+      color: white;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+    .pin-logo { font-size: 3rem; margin-bottom: 0.5rem; }
+    .pin-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.3rem; }
+    .pin-sub { font-size: 0.9rem; opacity: 0.75; margin-bottom: 2rem; }
+
+    .pin-dots { display: flex; gap: 10px; margin-bottom: 2rem; justify-content: center; }
+    .pin-dot {
+      width: 16px; height: 16px; border-radius: 50%;
+      border: 2.5px solid rgba(255,255,255,0.7); background: transparent;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .pin-dot.filled { background: white; transform: scale(1.15); }
+
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px; max-width: 280px; width: 100%;
+    }
+    .key {
+      background: rgba(255,255,255,0.15);
+      border: 1.5px solid rgba(255,255,255,0.25);
+      color: white; font-size: 1.6rem; font-weight: 600;
+      border-radius: 14px; padding: 18px 0;
+      cursor: pointer; user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.12s, transform 0.1s;
+      text-align: center;
+    }
+    .key:active { background: rgba(255,255,255,0.35); transform: scale(0.93); }
+    .key.del { font-size: 1.2rem; background: rgba(255,60,60,0.2); }
+    .key.empty { visibility: hidden; }
+
+    #pinError {
+      color: #ff8a80; font-size: 0.9rem;
+      margin-top: 1.2rem; min-height: 1.2em; text-align: center;
+    }
+
+    /* ── MAIN APP ── */
+    #mainApp { flex-direction: column; min-height: 100vh; }
 
     header {
       background-color: #1e90ff;
-      color: white;
-      padding: 1rem;
-      text-align: center;
-      font-size: 1.5rem;
+      color: white; padding: 1rem;
+      text-align: center; font-size: 1.3rem;
     }
 
-    main {
-      padding: 1rem;
-    }
+    main { padding: 1rem; flex: 1; }
 
-    .screen {
-      display: none;
-    }
-
-    .active {
-      display: block;
-    }
+    .app-screen { display: none; }
+    .app-screen.active { display: block; }
 
     input, button, select {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 1rem;
+      width: 100%; padding: 10px; margin: 10px 0;
+      border-radius: 8px; border: 1px solid #ccc; font-size: 1rem;
     }
-
-    button {
-      background-color: #28a745;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #218838;
-    }
+    button { background-color: #28a745; color: white; border: none; cursor: pointer; }
+    button:hover { background-color: #218838; }
 
     .product-card {
-      padding: 0.5rem;
-      background-color: #fff;
-      border: 1px solid #ddd;
-      margin-bottom: 0.5rem;
-      border-radius: 6px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      padding: 0.5rem; background-color: #fff;
+      border: 1px solid #ddd; margin-bottom: 0.5rem;
+      border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      display: flex; justify-content: space-between; align-items: center;
     }
-
-    .emoji {
-      font-size: 1.2rem;
-    }
-
     .cart-item-actions button {
-      background: transparent;
-      color: #007bff;
-      border: none;
-      font-size: 1rem;
+      background: transparent; color: #007bff;
+      border: none; font-size: 1rem;
+      width: auto; padding: 4px 8px; margin: 0;
     }
 
-    .cart-item-actions button:hover {
-      text-decoration: underline;
-    }
+    .row { display: flex; gap: 10px; }
+    .row > div { flex: 1; }
 
-    .row {
-      display: flex;
-      gap: 10px;
+    #batchModal {
+      display: none; position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6); z-index: 9999;
     }
-
-    .row > div {
-      flex: 1;
+    #batchModal .modal-inner {
+      background: white; margin: 5% auto; padding: 15px;
+      width: 95%; max-height: 80%; overflow: auto; border-radius: 10px;
     }
   </style>
 </head>
-
 <body>
-  <header>📝 Ishwar Pharma Order Form</header>
-  <main>
-    <div class="screen active" id="screen1">
-      <label>Date:</label>
-      <input type="text" id="date" readonly>
-      <label>Salesman Name:</label>
-      <input type="text" id="salesman">
-      <label>Party Name:</label>
-      <input type="text" id="party">
-      <label>Place/District:</label>
-      <input type="text" id="place">
-      <button onclick="nextScreen()">🚀 Start Ordering</button>
+
+  <!-- INSTALL WALL -->
+  <div class="screen" id="installWall">
+    <div class="logo">💊</div>
+    <h1>Ishwar Pharma</h1>
+    <p class="sub">Install the app to continue</p>
+
+    <div class="install-card" id="androidInstall" style="display:none">
+      <h2>📲 Install on your device</h2>
+      <p style="margin-bottom:1rem; opacity:0.85; font-size:0.9rem;">
+        Tap the button below to install. This is required before you can use the app.
+      </p>
+      <button id="installBtn">⬇️ Install App</button>
     </div>
 
-    <div class="screen" id="screen2">
-<div style="display: flex; align-items: center; gap: 5px;">
-  <input type="text" id="search" 
-         oninput="filterProducts()" 
-         placeholder="Enter brand name and company name" 
-         style="flex: 1; padding: 8px; font-size: 16px; border-radius: 4px; border: 1px solid #ccc;">
-  
-  <button onclick="resetSearch()" 
-          style="width: 28px; height: 28px; background: red; color: white; 
-                 border: none; font-size: 18px; font-weight: bold; 
-                 cursor: pointer; border-radius: 50%; 
-                 display: flex; align-items: center; justify-content: center; padding: 0;">
-    ✖
-  </button>
-</div>
-      <div id="suggestions"></div>
-
-<div id="entryForm" style="display:none">
-  <div id="rateInfo" style="font-weight:bold; margin-bottom:10px; color:#0055aa;"></div>
-  <div class="row">
-
-<div>
-  <label>Qty</label>
-  <input type="number" inputmode="decimal" id="qty">
-
-  <select id="qtyType">
-    <option value="Units">Units</option>
-    <option value="Box">Box</option>
-    <option value="Case">Case</option>
-  </select>
-
-  <!-- ✅ Button MUST be inside this same div -->
- <button onclick="handleBatchKYC()" 
-        style="margin-top:5px; background-color:#fd7e14; color:white;">
-  📦 Batch KYC
-</button>
-  </div>
-
-<div>
-  <label>Discount %</label>
-  <input type="number" inputmode="decimal" id="disc">
-</div>
- 
-<div>
-      <label>Special Rate</label>
-      <input type="number" inputmode="decimal" id="splRate">
-    </div>
-  </div>
-  <button onclick="addToCart()">➕ Add to Cart</button>
-</div>
- 
-
-      <h3>🛒 Cart</h3>
-      <div id="cart"></div>
-      <button onclick="finalizeOrder()">📥 Finalise & Download PDF</button>
+    <div class="install-card" id="iosInstall" style="display:none">
+      <h2>📲 Add to Home Screen</h2>
+      <ul class="ios-steps">
+        <li><span class="num">1</span><span>Tap the <strong>Share</strong> button ⬆ at the bottom of Safari</span></li>
+        <li><span class="num">2</span><span>Scroll down and tap <strong>"Add to Home Screen"</strong></span></li>
+        <li><span class="num">3</span><span>Tap <strong>"Add"</strong> in the top right corner</span></li>
+        <li><span class="num">4</span><span>Open <strong>Ishwar Pharma</strong> from your home screen</span></li>
+      </ul>
     </div>
 
-  <!-- ✅ BATCH POPUP -->
-<div id="batchModal" style="
-  display:none;
-  position:fixed;
-  top:0; left:0;
-  width:100%; height:100%;
-  background:rgba(0,0,0,0.6);
-  z-index:9999;
-">
+    <div class="install-card" id="genericInstall" style="display:none">
+      <h2>📱 Open on mobile</h2>
+      <p style="opacity:0.85; font-size:0.95rem; line-height:1.5;">
+        Please open this app on your Android or iPhone and install it to your home screen before use.
+      </p>
+    </div>
 
-  <div style="
-    background:white;
-    margin:5% auto;
-    padding:15px;
-    width:95%;
-    max-height:80%;
-    overflow:auto;
-    border-radius:10px;
-  ">
-
-    <h3>📦 Batch Details</h3>
-
-    <div id="batchContent"></div>
-
-    <button onclick="closeBatchModal()" 
-            style="background:#dc3545; margin-top:10px;">
-      ❌ Close
-    </button>
-
+    <p style="opacity:0.5; font-size:0.75rem; margin-top:1rem;">
+      Ishwar Pharma · Secure Field Order App
+    </p>
   </div>
-</div>
-  
-  </main>
+
+  <!-- PIN SCREEN -->
+  <div class="screen" id="pinScreen">
+    <div class="pin-logo">🔐</div>
+    <div class="pin-title">Enter your PIN</div>
+    <div class="pin-sub">8-digit PIN to access your orders</div>
+    <div class="pin-dots" id="pinDots"></div>
+    <div class="keypad">
+      <div class="key" onclick="pinKey('1')">1</div>
+      <div class="key" onclick="pinKey('2')">2</div>
+      <div class="key" onclick="pinKey('3')">3</div>
+      <div class="key" onclick="pinKey('4')">4</div>
+      <div class="key" onclick="pinKey('5')">5</div>
+      <div class="key" onclick="pinKey('6')">6</div>
+      <div class="key" onclick="pinKey('7')">7</div>
+      <div class="key" onclick="pinKey('8')">8</div>
+      <div class="key" onclick="pinKey('9')">9</div>
+      <div class="key empty"></div>
+      <div class="key" onclick="pinKey('0')">0</div>
+      <div class="key del" onclick="pinDel()">⌫</div>
+    </div>
+    <div id="pinError"></div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div class="screen" id="mainApp">
+    <header>📝 Ishwar Pharma Order Form</header>
+    <main>
+      <div class="app-screen active" id="appScreen1">
+        <label>Date:</label>
+        <input type="text" id="date" readonly>
+        <label>Salesman Name:</label>
+        <input type="text" id="salesman" readonly style="background:#e9ecef; color:#555;">
+        <label>Party Name:</label>
+        <input type="text" id="party">
+        <label>Place/District:</label>
+        <input type="text" id="place">
+        <button onclick="nextAppScreen()">🚀 Start Ordering</button>
+      </div>
+
+      <div class="app-screen" id="appScreen2">
+        <div style="display:flex; align-items:center; gap:5px;">
+          <input type="text" id="search" oninput="filterProducts()"
+                 placeholder="Enter brand name and company name"
+                 style="flex:1; padding:8px; font-size:16px; border-radius:4px; border:1px solid #ccc; margin:0;">
+          <button onclick="resetSearch()"
+                  style="width:28px; height:28px; background:red; color:white;
+                         border:none; font-size:18px; font-weight:bold;
+                         cursor:pointer; border-radius:50%;
+                         display:flex; align-items:center; justify-content:center; padding:0; margin:0;">
+            ✖
+          </button>
+        </div>
+
+        <div id="suggestions"></div>
+
+        <div id="entryForm" style="display:none">
+          <div id="rateInfo" style="font-weight:bold; margin-bottom:10px; color:#0055aa;"></div>
+          <div class="row">
+            <div>
+              <label>Qty</label>
+              <input type="number" inputmode="decimal" id="qty">
+              <select id="qtyType">
+                <option value="Units">Units</option>
+                <option value="Box">Box</option>
+                <option value="Case">Case</option>
+              </select>
+              <button onclick="handleBatchKYC()" style="margin-top:5px; background-color:#fd7e14; color:white;">
+                📦 Batch KYC
+              </button>
+            </div>
+            <div>
+              <label>Discount %</label>
+              <input type="number" inputmode="decimal" id="disc">
+            </div>
+            <div>
+              <label>Special Rate</label>
+              <input type="number" inputmode="decimal" id="splRate">
+            </div>
+          </div>
+          <button onclick="addToCart()">➕ Add to Cart</button>
+        </div>
+
+        <h3>🛒 Cart</h3>
+        <div id="cart"></div>
+        <button onclick="finalizeOrder()">📥 Finalise &amp; Download PDF</button>
+      </div>
+    </main>
+  </div>
+
+  <!-- BATCH MODAL -->
+  <div id="batchModal">
+    <div class="modal-inner">
+      <h3>📦 Batch Details</h3>
+      <div id="batchContent"></div>
+      <button onclick="closeBatchModal()" style="background:#dc3545; margin-top:10px;">❌ Close</button>
+    </div>
+  </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
   <script>
-    let stockData = [];
-    let cart = [];
-    let selectedProduct = null;
+  /* ── Service Worker ── */
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  }
 
-    document.getElementById("date").value = new Date().toISOString().split('T')[0];
+  /* ── Device detection ── */
+  const isIOS      = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isAndroid  = /android/i.test(navigator.userAgent);
+  const isStandalone = window.navigator.standalone === true
+                    || window.matchMedia('(display-mode: standalone)').matches;
 
-    async function fetchExcel() {
-      const response = await fetch("stock.xlsx");
-      const blob = await response.blob();
-      const data = await blob.arrayBuffer();
-      const workbook = XLSX.read(data);
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  /* ══ INSTALL WALL ══════════════════════════════════════════ */
+  let deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+  });
+
+  function decideFirstScreen() {
+    if (isStandalone) { bootApp(); return; }
+    show('installWall');
+    if (isIOS) {
+      document.getElementById('iosInstall').style.display = 'block';
+    } else if (isAndroid) {
+      document.getElementById('androidInstall').style.display = 'block';
+    } else {
+      // Desktop: allow through for testing/admin; or change to genericInstall to block
+      bootApp();
+    }
+  }
+
+  document.getElementById('installBtn').addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+  });
+
+  /* ══ BOOT ═══════════════════════════════════════════════════ */
+  let currentUser = null;
+
+  function bootApp() {
+    const saved = localStorage.getItem('ip_user');
+    if (saved) {
+      try {
+        currentUser = JSON.parse(saved);
+        launchMainApp();
+        return;
+      } catch(e) {
+        localStorage.removeItem('ip_user');
+      }
+    }
+    showPinScreen();
+  }
+
+  /* ══ PIN SCREEN ═════════════════════════════════════════════ */
+  let pinEntry = '';
+  const PIN_LEN = 8;
+  let usersData = [];
+
+  async function showPinScreen() {
+    show('pinScreen');
+    buildDots();
+    try {
+      const res = await fetch('users.json?nc=' + Date.now());
+      usersData = await res.json();
+    } catch(e) { usersData = []; }
+  }
+
+  function buildDots() {
+    const c = document.getElementById('pinDots');
+    c.innerHTML = '';
+    for (let i = 0; i < PIN_LEN; i++) {
+      const d = document.createElement('div');
+      d.className = 'pin-dot';
+      d.id = 'dot-' + i;
+      c.appendChild(d);
+    }
+  }
+
+  function refreshDots() {
+    for (let i = 0; i < PIN_LEN; i++) {
+      document.getElementById('dot-' + i).classList.toggle('filled', i < pinEntry.length);
+    }
+  }
+
+  function pinKey(digit) {
+    if (pinEntry.length >= PIN_LEN) return;
+    pinEntry += digit;
+    refreshDots();
+    document.getElementById('pinError').textContent = '';
+    if (pinEntry.length === PIN_LEN) checkPin();
+  }
+
+  function pinDel() {
+    if (!pinEntry.length) return;
+    pinEntry = pinEntry.slice(0, -1);
+    refreshDots();
+    document.getElementById('pinError').textContent = '';
+  }
+
+  function checkPin() {
+    const match = usersData.find(u => u.pin === pinEntry);
+    if (match) {
+      currentUser = { name: match.name, companies: match.companies };
+      localStorage.setItem('ip_user', JSON.stringify(currentUser));
+      pinEntry = '';
+      refreshDots();
+      launchMainApp();
+    } else {
+      document.getElementById('pinError').textContent = '❌ Incorrect PIN. Try again.';
+      setTimeout(() => {
+        pinEntry = '';
+        refreshDots();
+        document.getElementById('pinError').textContent = '';
+      }, 900);
+    }
+  }
+
+  /* ══ MAIN APP ════════════════════════════════════════════════ */
+  let stockData = [], cart = [], selectedProduct = null, batchData = [];
+
+  function launchMainApp() {
+    show('mainApp');
+    document.getElementById('date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('salesman').value = currentUser.name;
+    fetchExcel();
+    fetchBatch();
+  }
+
+  function isCompanyAllowed(company) {
+    if (!currentUser) return false;
+    if (currentUser.companies === 'ALL') return true;
+    const allowed = currentUser.companies.map(c => c.toLowerCase());
+    return allowed.some(c => company.toLowerCase().includes(c));
+  }
+
+  async function fetchExcel() {
+    try {
+      const res = await fetch('stock.xlsx');
+      const data = await (await res.blob()).arrayBuffer();
+      const wb = XLSX.read(data);
+      const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
+      stockData = [];
       json.forEach(row => {
         if (row[1] && row[13] && row[12] && row[10]) {
-          stockData.push({
-            brand: row[1],
-            company: row[13],
-            rate: row[12],
-            mrp: row[10],
-            stock: row[3]
-          });
+          const company = String(row[13] || '');
+          if (isCompanyAllowed(company)) {
+            stockData.push({ brand: row[1], company, rate: row[12], mrp: row[10], stock: row[3] });
+          }
         }
       });
-    }
+    } catch(e) { console.error('fetchExcel:', e); }
+  }
 
-    fetchExcel();
-
-function nextScreen() {
-  const s = document.getElementById("salesman").value;
-  const p = document.getElementById("party").value;
-  const pl = document.getElementById("place").value;
-
-  document.getElementById("screen1").classList.remove("active");
-  document.getElementById("screen2").classList.add("active");
-}
-    function highlightText(text, token) {
-      if (!token) return String(text);
-      const esc = token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      return String(text).replace(new RegExp('(' + esc + ')', 'gi'),
-        '<mark style="background:yellow;padding:0;font-weight:bold;">$1</mark>');
-    }
-
-    function filterProducts() {
-      const input = document.getElementById("search").value.trim();
-      const container = document.getElementById("suggestions");
-      container.innerHTML = "";
-      if (!input) return;
-
-      const parts = input.toLowerCase().split(/\s+/).filter(Boolean);
-      const brandToken   = parts[0] || "";   // first word → brand must START with this
-      const companyToken = parts[1] || "";   // second word → company must START with this
-
-      const matches = stockData.filter(p => {
-        const brand   = (p.brand   || "").toLowerCase();
-        const company = (p.company || "").toLowerCase();
-        if (!brand.startsWith(brandToken)) return false;
-        if (companyToken && !company.startsWith(companyToken)) return false;
-        return true;
+  async function fetchBatch() {
+    try {
+      const res = await fetch('batch.xlsx');
+      const d = await (await res.blob()).arrayBuffer();
+      const wb = XLSX.read(d);
+      const j = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
+      batchData = [];
+      j.forEach(r => {
+        if (r[1]) batchData.push({
+          product: r[1], qty: Number(r[3]) || 0, cost: Number(r[8]) || 0,
+          batch: String(r[16] || ''), expiry: parseDate(r[18]).toLocaleDateString('en-GB')
+        });
       });
+    } catch(e) { console.error('fetchBatch:', e); }
+  }
 
-      matches.slice(0, 200).forEach(p => {
-        const div = document.createElement("div");
-        div.className = "product-card";
-        const hlBrand   = highlightText(p.brand   || "", brandToken);
-        const hlCompany = highlightText(p.company || "", companyToken);
-        div.innerHTML = `<span style="display:inline-block;min-width:300px;text-align:left;">
-          ${hlBrand} | ${hlCompany} |
-          <b style="color:red;">Rate: ${Number(p.rate).toFixed(2)}</b> |
-          <b style="color:blue;">MRP: ${Number(p.mrp).toFixed(2)}</b> |
-          <b style="color:green;">Stock: ${p.stock || "-"}</b>
-        </span>`;
-        div.onclick = () => {
-          selectedProduct = p;
-          document.getElementById("entryForm").style.display = "block";
-          document.getElementById("rateInfo").innerHTML =
-            `\u{1F4B0} <b>Rate:</b> \u20B9${p.rate} &nbsp;&nbsp; \u{1F3F7}\uFE0F <b>MRP:</b> \u20B9${p.mrp}`;
-          container.innerHTML = "";
-          document.getElementById("search").value = `${p.brand} | ${p.company}`;
-        };
-        container.appendChild(div);
-      });
+  function normalize(str) { return (str || '').toLowerCase().replace(/[^a-z0-9]/g, ''); }
+  function parseDate(e) {
+    if (!e) return new Date(0);
+    if (typeof e === 'number') return new Date((e - 25569) * 86400000);
+    return new Date(e);
+  }
+
+  function nextAppScreen() {
+    if (!document.getElementById('party').value || !document.getElementById('place').value) {
+      alert('Please fill Party Name and Place.'); return;
     }
+    document.getElementById('appScreen1').classList.remove('active');
+    document.getElementById('appScreen2').classList.add('active');
+  }
 
-function addToCart() {
-  try {
-    // Basic validation
-    if (!selectedProduct) {
-      alert("Please select a product first.");
-      return;
-    }
-    
-    const qtyRaw = document.getElementById("qty").value;
-    const qty = qtyRaw === "" ? "" : qtyRaw; // keep as string if empty or numeric string
-    if (!qty) {
-      // optional: require qty — if you want to allow blank qty remove this check
-      if (!confirm("Quantity is empty. Add item with empty quantity?")) return;
-    }
+  function highlightText(text, token) {
+    if (!token) return String(text);
+    const esc = token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return String(text).replace(new RegExp('(' + esc + ')', 'gi'),
+      '<mark style="background:yellow;padding:0;font-weight:bold;">$1</mark>');
+  }
 
-    const disc = document.getElementById("disc").value || "";
-    const splRate = document.getElementById("splRate").value || "";
-
-    // support both possible select ids: 'pack' or 'qtyType'
-    const packEl = document.getElementById("pack") || document.getElementById("qtyType");
-    const pack = packEl ? (packEl.value || "") : "";
-
-    // push into cart (keep values as entered, no parsing)
-    cart.push({
-      ...selectedProduct,
-      qty,
-      pack,
-      disc,
-      splRate
+  function filterProducts() {
+    const input = document.getElementById('search').value.trim();
+    const container = document.getElementById('suggestions');
+    container.innerHTML = '';
+    if (!input) return;
+    const parts = input.toLowerCase().split(/\s+/).filter(Boolean);
+    const brandToken = parts[0] || '', companyToken = parts[1] || '';
+    const matches = stockData.filter(p => {
+      const b = (p.brand || '').toLowerCase(), c = (p.company || '').toLowerCase();
+      if (!b.startsWith(brandToken)) return false;
+      if (companyToken && !c.startsWith(companyToken)) return false;
+      return true;
     });
-
-    // Reset UI
-    document.getElementById("entryForm").style.display = "none";
-    document.getElementById("qty").value = "";
-    document.getElementById("disc").value = "";
-    document.getElementById("splRate").value = "";
-    if (packEl) packEl.value = packEl.querySelector("option") ? packEl.querySelector("option").value : "";
-    document.getElementById("search").value = "";
-    const suggestions = document.getElementById("suggestions");
-    if (suggestions) suggestions.innerHTML = "";
-
-    selectedProduct = null; // clear selection so user must choose next product explicitly
-    renderCart();
-  } catch (err) {
-    console.error("addToCart error:", err);
-    alert("Something went wrong while adding to cart. Open browser console for details.");
-  }
-}
-    
-// ===== BATCH DATA =====
-let batchData = [];
-
-// Load batch.xlsx
-fetch("batch.xlsx")
-  .then(r => r.arrayBuffer())
-  .then(d => {
-    let wb = XLSX.read(d);
-    let j = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
-
-    j.forEach(r => {
-      if (r[1]) {
-        batchData.push({
-  product: r[1],
-  qty: Number(r[3]) || 0,
-  cost: Number(r[8]) || 0,
-  batch: String(r[16] || ""),
-  expiry: parseDate(r[18]).toLocaleDateString('en-GB')
-});
-         }
+    matches.slice(0, 200).forEach(p => {
+      const div = document.createElement('div');
+      div.className = 'product-card';
+      div.innerHTML = `<span style="display:inline-block;min-width:300px;text-align:left;">
+        ${highlightText(p.brand||'', brandToken)} | ${highlightText(p.company||'', companyToken)} |
+        <b style="color:red;">Rate: ${Number(p.rate).toFixed(2)}</b> |
+        <b style="color:blue;">MRP: ${Number(p.mrp).toFixed(2)}</b> |
+        <b style="color:green;">Stock: ${p.stock||'-'}</b>
+      </span>`;
+      div.onclick = () => {
+        selectedProduct = p;
+        document.getElementById('entryForm').style.display = 'block';
+        document.getElementById('rateInfo').innerHTML =
+          `💰 <b>Rate:</b> ₹${p.rate} &nbsp;&nbsp; 🏷️ <b>MRP:</b> ₹${p.mrp}`;
+        container.innerHTML = '';
+        document.getElementById('search').value = `${p.brand} | ${p.company}`;
+      };
+      container.appendChild(div);
     });
-  });
-
-// Normalize
-function normalize(str) {
-  return (str || "").toLowerCase().replace(/[^a-z0-9]/g, "");
-}
-
-// Date parser
-function parseDate(e) {
-  if (!e) return new Date(0);
-  if (typeof e === "number") return new Date((e - 25569) * 86400000);
-  return new Date(e);
-}
-
-// ===== OPEN POPUP =====
-function handleBatchKYC() {
-  if (!selectedProduct) {
-    alert("Please select a product first");
-    return;
   }
 
-  showBatchModal(selectedProduct.brand, selectedProduct.stock);
-}
-
-// ===== SHOW BATCH =====
-function showBatchModal(name, total) {
-
-  let today = new Date();
-
-  let batches = batchData
-    .filter(b =>
-      normalize(b.product) === normalize(name) &&
-      b.qty > 0 &&
-      parseDate(b.expiry) >= today
-    )
-    .sort((a, b) => parseDate(b.expiry) - parseDate(a.expiry));
-
-  let rem = total;
-  let final = [];
-
-  for (let b of batches) {
-    if (rem <= 0) break;
-    let use = Math.min(rem, b.qty);
-    final.push({ ...b, use });
-    rem -= use;
+  function resetSearch() {
+    document.getElementById('search').value = '';
+    document.getElementById('suggestions').innerHTML = '';
   }
 
-  let html = `<table style="width:100%; border-collapse:collapse;">
-  <tr style="background:#1e90ff; color:white;">
-    <th>Qty</th><th>Batch</th><th>Expiry</th><th>Cost</th>
-  </tr>`;
-
-  final.forEach(b => {
-    html += `<tr>
-      <td style="color:green">${b.use}</td>
-      <td>${b.batch}</td>
-      <td style="color:red">${b.expiry}</td>
-      <td style="color:orange">₹${Number(b.cost).toFixed(2)}</td>
-    </tr>`;
-  });
-
-  html += "</table>";
-
-  document.getElementById("batchContent").innerHTML = html;
-  document.getElementById("batchModal").style.display = "block";
-}
-
-// ===== CLOSE =====
-function closeBatchModal() {
-  document.getElementById("batchModal").style.display = "none";
-}
-    
-    function renderCart() {
-      const c = document.getElementById("cart");
-      c.innerHTML = "";
-      cart.forEach((item, index) => {
-        const div = document.createElement("div");
-        div.className = "product-card";
-        div.innerHTML = `${index + 1}. ${item.brand} (${item.company}) - Qty: ${item.qty} ${item.qtyType || ''} | Rate: ₹${item.rate} | Spl: ₹${item.splRate || "-"} | Disc: ${item.disc || 0}% <span class='cart-item-actions'><button onclick='removeItem(${index})'>❌</button></span>`;
-        c.appendChild(div);
-      });
-    }
-
-    function removeItem(i) {
-      cart.splice(i, 1);
+  function addToCart() {
+    try {
+      if (!selectedProduct) { alert('Please select a product first.'); return; }
+      const qty = document.getElementById('qty').value;
+      if (!qty && !confirm('Quantity is empty. Add anyway?')) return;
+      const disc = document.getElementById('disc').value || '';
+      const splRate = document.getElementById('splRate').value || '';
+      const packEl = document.getElementById('qtyType');
+      cart.push({ ...selectedProduct, qty, pack: packEl ? packEl.value : '', disc, splRate });
+      document.getElementById('entryForm').style.display = 'none';
+      ['qty','disc','splRate'].forEach(id => document.getElementById(id).value = '');
+      if (packEl) packEl.selectedIndex = 0;
+      document.getElementById('search').value = '';
+      document.getElementById('suggestions').innerHTML = '';
+      selectedProduct = null;
       renderCart();
+    } catch(err) { console.error(err); alert('Something went wrong.'); }
+  }
+
+  function renderCart() {
+    const c = document.getElementById('cart');
+    c.innerHTML = '';
+    cart.forEach((item, i) => {
+      const div = document.createElement('div');
+      div.className = 'product-card';
+      div.innerHTML = `${i+1}. ${item.brand} (${item.company}) - Qty: ${item.qty} ${item.pack||''} | Rate: ₹${item.rate} | Spl: ₹${item.splRate||'-'} | Disc: ${item.disc||0}% <span class='cart-item-actions'><button onclick='removeItem(${i})'>❌</button></span>`;
+      c.appendChild(div);
+    });
+  }
+
+  function removeItem(i) { cart.splice(i, 1); renderCart(); }
+
+  function handleBatchKYC() {
+    if (!selectedProduct) { alert('Please select a product first'); return; }
+    showBatchModal(selectedProduct.brand, selectedProduct.stock);
+  }
+
+  function showBatchModal(name, total) {
+    const today = new Date();
+    let batches = batchData
+      .filter(b => normalize(b.product) === normalize(name) && b.qty > 0 && parseDate(b.expiry) >= today)
+      .sort((a, b) => parseDate(b.expiry) - parseDate(a.expiry));
+    let rem = total, final = [];
+    for (let b of batches) {
+      if (rem <= 0) break;
+      let use = Math.min(rem, b.qty);
+      final.push({...b, use}); rem -= use;
     }
+    let html = `<table style="width:100%;border-collapse:collapse;">
+      <tr style="background:#1e90ff;color:white;"><th>Qty</th><th>Batch</th><th>Expiry</th><th>Cost</th></tr>`;
+    final.forEach(b => { html += `<tr>
+      <td style="color:green">${b.use}</td><td>${b.batch}</td>
+      <td style="color:red">${b.expiry}</td><td style="color:orange">₹${Number(b.cost).toFixed(2)}</td>
+    </tr>`; });
+    html += '</table>';
+    document.getElementById('batchContent').innerHTML = html;
+    document.getElementById('batchModal').style.display = 'block';
+  }
 
-async function finalizeOrder() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
+  function closeBatchModal() { document.getElementById('batchModal').style.display = 'none'; }
 
-  const date = document.getElementById("date").value;
-  const salesman = document.getElementById("salesman").value;
-  const party = document.getElementById("party").value;
-  const place = document.getElementById("place").value;
+  async function finalizeOrder() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const date     = document.getElementById('date').value;
+    const salesman = document.getElementById('salesman').value;
+    const party    = document.getElementById('party').value;
+    const place    = document.getElementById('place').value;
 
-  // Header
-  doc.setFontSize(16);
-  doc.text("Ishwar Pharma - Purchase Order", 14, 15);
+    doc.setFontSize(16); doc.text('Ishwar Pharma - Purchase Order', 14, 15);
+    doc.setFontSize(12);
+    doc.text(`Date: ${date}`, 14, 25);
+    doc.text(`Salesman: ${salesman}`, 14, 32);
+    doc.text(`Party: ${party}`, 14, 39);
+    doc.text(`Place: ${place}`, 14, 46);
 
-  doc.setFontSize(12);
-  doc.text(`Date: ${date}`, 14, 25);
-  doc.text(`Salesman: ${salesman}`, 14, 32);
-  doc.text(`Party: ${party}`, 14, 39);
-  doc.text(`Place: ${place}`, 14, 46);
+    doc.autoTable({
+      head: [['Sr','Brand','Company','Qty','Rate','Special Rate','Disc%']],
+      body: cart.map((item, i) => [
+        i+1, item.brand||'', item.company||'',
+        (item.qty||'') + ' ' + (item.pack||''),
+        item.rate ? Number(item.rate).toFixed(2) : '',
+        item.splRate ? Number(item.splRate).toFixed(2) : '-',
+        (item.disc||0) + '%'
+      ]),
+      startY: 55,
+      styles: { fontSize: 10, halign: 'left', cellPadding: 2 },
+      headStyles: { fillColor: [0, 102, 204], textColor: 255, fontStyle: 'bold' },
+      columnStyles: { 4: { fontStyle: 'bold' }, 5: { textColor: [255,0,0], fontStyle: 'bold' } }
+    });
 
-  // Table headings
-  const headers = [["Sr", "Brand", "Company", "Qty", "Rate", "Special Rate", "Disc%"]];
+    const safeParty = party.replace(/[^a-z0-9]/gi, '_');
+    const safePlace = place.replace(/[^a-z0-9]/gi, '_');
+    doc.save(`${safeParty}_${safePlace}.pdf`);
+  }
 
-// Table rows
-const rows = cart.map((item, index) => [
-  index + 1,
-  item.brand || "",
-  item.company || "",
-  (item.qty || "") + " " + (item.pack || ""),
-  item.rate ? Number(item.rate).toFixed(2) : "",
-  item.splRate ? Number(item.splRate).toFixed(2) : "-",
-  (item.disc || 0) + "%"
-]);
-  
-
-  // Generate table
-  doc.autoTable({
-    head: headers,
-    body: rows,
-    startY: 55,
-    styles: { fontSize: 10, halign: 'left', cellPadding: 2 },
-    headStyles: { fillColor: [0, 102, 204], textColor: 255, fontStyle: 'bold' },
-    columnStyles: {
-      4: { textColor: [0, 0, 0], fontStyle: 'bold' }, // Rate
-      5: { textColor: [255, 0, 0], fontStyle: 'bold' } // Special Rate in red
-    }
-  });
-
-const safeParty = party.replace(/[^a-z0-9]/gi, '_');  
-const safePlace = place.replace(/[^a-z0-9]/gi, '_');  
-doc.save(`${safeParty}_${safePlace}.pdf`);
-}
-
-function resetSearch() {
-  document.getElementById('search').value = '';
-  document.getElementById('suggestions').innerHTML = '';
-}
-
-
+  /* ── BOOT ── */
+  decideFirstScreen();
   </script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-
 </body>
-
 </html>
