@@ -236,14 +236,49 @@
         <input type="text" id="date" readonly>
         <label>Salesman Name:</label>
         <input type="text" id="salesman" readonly style="background:#e9ecef; color:#555;">
-        <label>Party Name:</label>
-        <input type="text" id="party">
-        <label>Place/District:</label>
-        <input type="text" id="place">
-        <button onclick="nextAppScreen()">🚀 Start Ordering</button>
+        <label>Party Name: <span style="color:#999;font-weight:normal;font-size:0.85rem;">(required for ordering)</span></label>
+        <input type="text" id="party" placeholder="Optional for rate check">
+        <label>Place/District: <span style="color:#999;font-weight:normal;font-size:0.85rem;">(required for ordering)</span></label>
+        <input type="text" id="place" placeholder="Optional for rate check">
+
+        <div style="display:flex; gap:10px; margin-top:6px;">
+          <button onclick="startMode('order')"
+                  style="flex:1; background:#1e90ff; font-size:1rem; padding:14px 10px; border-radius:10px;">
+            🛒 Place Order
+          </button>
+          <button onclick="startMode('check')"
+                  style="flex:1; background:#6c757d; font-size:1rem; padding:14px 10px; border-radius:10px;">
+            🔍 Check Rates
+          </button>
+        </div>
       </div>
 
       <div class="app-screen" id="appScreen2">
+
+        <!-- Mode banner -->
+        <div id="modeBanner" style="
+          display:none;
+          background:#fff3cd; border:1px solid #ffc107;
+          border-radius:8px; padding:10px 12px; margin-bottom:8px;
+          font-size:0.9rem; color:#856404;
+          display:flex; justify-content:space-between; align-items:center;
+        ">
+          <span>👁️ <b>Rate Check Mode</b> — tap a product to see batch details</span>
+          <button onclick="goBack()" style="
+            width:auto; padding:4px 10px; margin:0;
+            background:#6c757d; color:white; font-size:0.8rem; border-radius:6px;">
+            ← Back
+          </button>
+        </div>
+
+        <div id="orderBanner" style="display:none; margin-bottom:6px;">
+          <button onclick="goBack()" style="
+            width:auto; padding:6px 14px; margin:0;
+            background:#6c757d; color:white; font-size:0.85rem; border-radius:6px;">
+            ← Back
+          </button>
+        </div>
+
         <div style="display:flex; align-items:center; gap:5px;">
           <input type="text" id="search" oninput="filterProducts()"
                  placeholder="Enter brand name and company name"
@@ -259,6 +294,7 @@
 
         <div id="suggestions"></div>
 
+        <!-- Order-only entry form -->
         <div id="entryForm" style="display:none">
           <div id="rateInfo" style="font-weight:bold; margin-bottom:10px; color:#0055aa;"></div>
           <div class="row">
@@ -286,9 +322,20 @@
           <button onclick="addToCart()">➕ Add to Cart</button>
         </div>
 
-        <h3>🛒 Cart</h3>
-        <div id="cart"></div>
-        <button onclick="finalizeOrder()">📥 Finalise &amp; Download PDF</button>
+        <!-- Check-mode: batch popup trigger -->
+        <div id="checkEntryForm" style="display:none">
+          <div id="checkRateInfo" style="font-weight:bold; margin:10px 0; color:#0055aa; font-size:1rem;"></div>
+          <button onclick="handleBatchKYC()" style="background-color:#fd7e14; color:white;">
+            📦 View Batch & Expiry
+          </button>
+        </div>
+
+        <!-- Cart (order mode only) -->
+        <div id="cartSection">
+          <h3>🛒 Cart</h3>
+          <div id="cart"></div>
+          <button onclick="finalizeOrder()">📥 Finalise &amp; Download PDF</button>
+        </div>
       </div>
     </main>
   </div>
@@ -490,12 +537,32 @@
     return new Date(e);
   }
 
-  function nextAppScreen() {
-    if (!document.getElementById('party').value || !document.getElementById('place').value) {
-      alert('Please fill Party Name and Place.'); return;
+  let appMode = 'order';
+
+  function startMode(mode) {
+    if (mode === 'order') {
+      const party = document.getElementById('party').value.trim();
+      const place = document.getElementById('place').value.trim();
+      if (!party || !place) {
+        alert('Please enter Party Name and Place before placing an order.');
+        return;
+      }
     }
+    appMode = mode;
     document.getElementById('appScreen1').classList.remove('active');
     document.getElementById('appScreen2').classList.add('active');
+    document.getElementById('modeBanner').style.display  = mode === 'check' ? 'flex' : 'none';
+    document.getElementById('orderBanner').style.display = mode === 'order' ? 'block' : 'none';
+    document.getElementById('cartSection').style.display = mode === 'order' ? 'block' : 'none';
+    resetSearch();
+  }
+
+  function goBack() {
+    document.getElementById('appScreen2').classList.remove('active');
+    document.getElementById('appScreen1').classList.add('active');
+    document.getElementById('entryForm').style.display = 'none';
+    document.getElementById('checkEntryForm').style.display = 'none';
+    resetSearch();
   }
 
   function highlightText(text, token) {
@@ -529,11 +596,22 @@
       </span>`;
       div.onclick = () => {
         selectedProduct = p;
-        document.getElementById('entryForm').style.display = 'block';
-        document.getElementById('rateInfo').innerHTML =
-          `💰 <b>Rate:</b> ₹${p.rate} &nbsp;&nbsp; 🏷️ <b>MRP:</b> ₹${p.mrp}`;
         container.innerHTML = '';
         document.getElementById('search').value = `${p.brand} | ${p.company}`;
+        if (appMode === 'check') {
+          document.getElementById('entryForm').style.display = 'none';
+          document.getElementById('checkEntryForm').style.display = 'block';
+          document.getElementById('checkRateInfo').innerHTML =
+            `<b>${p.brand}</b> — ${p.company}<br>
+            💰 Rate: ₹${Number(p.rate).toFixed(2)} &nbsp;|&nbsp;
+            🏷️ MRP: ₹${Number(p.mrp).toFixed(2)} &nbsp;|&nbsp;
+            📦 Stock: ${p.stock || '-'}`;
+        } else {
+          document.getElementById('checkEntryForm').style.display = 'none';
+          document.getElementById('entryForm').style.display = 'block';
+          document.getElementById('rateInfo').innerHTML =
+            `💰 <b>Rate:</b> ₹${p.rate} &nbsp;&nbsp; 🏷️ <b>MRP:</b> ₹${p.mrp}`;
+        }
       };
       container.appendChild(div);
     });
