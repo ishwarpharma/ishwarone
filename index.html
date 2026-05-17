@@ -2,213 +2,742 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ishwar Pharma Order Form</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Ishwar Pharma</title>
 
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#1e90ff">
+  <meta name="theme-color" content="#E65100">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="IshwarPharma">
 
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-      color: #333;
-      min-height: 100vh;
+    :root {
+      --saffron:      #FF6F00;
+      --saffron-dark: #E65100;
+      --saffron-deep: #BF360C;
+      --saffron-lt:   #FFF3E0;
+      --saffron-pale: #FFF8F0;
+      --amber:        #FFB300;
+      --amber-lt:     #FFF8E1;
+      --green:        #2E7D32;
+      --green-lt:     #E8F5E9;
+      --red:          #C62828;
+      --red-lt:       #FFEBEE;
+      --blue:         #1565C0;
+      --blue-lt:      #E3F2FD;
+      --ink:          #1A1A1A;
+      --ink2:         #4A4A4A;
+      --ink3:         #888;
+      --border:       #EDEDED;
+      --surface:      #F7F4F0;
+      --white:        #FFFFFF;
     }
 
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: -apple-system, 'Segoe UI', Arial, sans-serif;
+      background: var(--surface);
+      color: var(--ink);
+      min-height: 100vh;
+      overscroll-behavior: none;
+    }
+
+    /* ════════════════════════════════════════
+       SCREENS
+    ════════════════════════════════════════ */
     .screen { display: none; }
     .screen.active { display: flex; flex-direction: column; min-height: 100vh; }
 
-    /* ── INSTALL WALL ── */
+    /* ════════════════════════════════════════
+       INSTALL WALL
+    ════════════════════════════════════════ */
     #installWall {
-      background: linear-gradient(160deg, #0d47a1 0%, #1e90ff 60%, #29b6f6 100%);
+      background: var(--saffron);
       color: white;
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 2rem 1.5rem;
+      padding: 3rem 1.5rem 2rem;
     }
-    #installWall .logo { font-size: 4rem; margin-bottom: 0.5rem; }
-    #installWall h1 { font-size: 1.7rem; font-weight: 700; margin-bottom: 0.4rem; }
-    #installWall p.sub { font-size: 1rem; opacity: 0.85; margin-bottom: 2rem; }
 
-    .install-card {
-      background: rgba(255,255,255,0.15);
-      border-radius: 16px;
+    .iw-brand {
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      opacity: 0.75;
+      margin-bottom: 0.5rem;
+    }
+
+    .iw-logo {
+      width: 72px; height: 72px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.2rem;
+      margin: 0 auto 1rem;
+    }
+
+    #installWall h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+    }
+
+    #installWall p.sub {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      margin-bottom: 2.5rem;
+    }
+
+    .iw-card {
+      background: white;
+      border-radius: 20px;
       padding: 1.5rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
       width: 100%;
       max-width: 360px;
+      color: var(--ink);
+      text-align: left;
     }
-    .install-card h2 { font-size: 1.1rem; margin-bottom: 1rem; }
+
+    .iw-card h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--saffron-dark);
+      margin-bottom: 1rem;
+    }
 
     #installBtn {
-      background: white;
-      color: #1e90ff;
-      font-size: 1.1rem;
-      font-weight: 700;
-      padding: 0.9rem 2rem;
+      background: var(--saffron);
+      color: white;
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 0.85rem;
       border: none;
-      border-radius: 50px;
+      border-radius: 12px;
       cursor: pointer;
       width: 100%;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      letter-spacing: 0.02em;
     }
-    #installBtn:active { opacity: 0.85; }
+    #installBtn:active { opacity: 0.88; transform: scale(0.98); }
 
-    .ios-steps { text-align: left; list-style: none; }
+    .ios-steps { list-style: none; }
     .ios-steps li {
-      display: flex; align-items: flex-start; gap: 0.7rem;
-      margin-bottom: 0.9rem; font-size: 0.95rem; line-height: 1.4;
+      display: flex; align-items: flex-start; gap: 0.75rem;
+      margin-bottom: 0.85rem; font-size: 0.9rem;
+      color: var(--ink2); line-height: 1.45;
     }
     .ios-steps li .num {
-      background: white; color: #1e90ff; font-weight: 700;
-      border-radius: 50%; width: 26px; height: 26px;
+      background: var(--saffron);
+      color: white; font-weight: 700;
+      border-radius: 50%; width: 24px; height: 24px; min-width: 24px;
       display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0; font-size: 0.85rem;
+      font-size: 0.75rem;
     }
 
-    /* ── PIN SCREEN ── */
+    /* ════════════════════════════════════════
+       PIN SCREEN
+    ════════════════════════════════════════ */
     #pinScreen {
-      background: linear-gradient(160deg, #0d47a1 0%, #1565c0 100%);
+      background: var(--saffron-dark);
       color: white;
       align-items: center;
       justify-content: center;
-      padding: 2rem 1rem;
+      padding: 2.5rem 1rem 3rem;
+      gap: 0;
     }
-    .pin-logo { font-size: 3rem; margin-bottom: 0.5rem; }
-    .pin-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.3rem; }
-    .pin-sub { font-size: 0.9rem; opacity: 0.75; margin-bottom: 2rem; }
 
-    .pin-dots { display: flex; gap: 10px; margin-bottom: 2rem; justify-content: center; }
-    .pin-dot {
-      width: 16px; height: 16px; border-radius: 50%;
-      border: 2.5px solid rgba(255,255,255,0.7); background: transparent;
-      transition: background 0.15s, transform 0.1s;
+    .pin-brand {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      opacity: 0.6;
+      margin-bottom: 0.6rem;
     }
-    .pin-dot.filled { background: white; transform: scale(1.15); }
+
+    .pin-logo {
+      width: 60px; height: 60px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+    }
+
+    .pin-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .pin-sub {
+      font-size: 0.8rem;
+      opacity: 0.65;
+      margin-bottom: 2rem;
+    }
+
+    .pin-dots {
+      display: flex; gap: 12px;
+      margin-bottom: 2.5rem;
+      justify-content: center;
+    }
+
+    .pin-dot {
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.5);
+      background: transparent;
+      transition: background 0.12s, transform 0.1s;
+    }
+    .pin-dot.filled {
+      background: white;
+      border-color: white;
+      transform: scale(1.2);
+    }
 
     .keypad {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 14px; max-width: 280px; width: 100%;
+      gap: 12px;
+      max-width: 288px;
+      width: 100%;
     }
+
     .key {
-      background: rgba(255,255,255,0.15);
-      border: 1.5px solid rgba(255,255,255,0.25);
-      color: white; font-size: 1.6rem; font-weight: 600;
-      border-radius: 14px; padding: 18px 0;
-      cursor: pointer; user-select: none;
-      -webkit-tap-highlight-color: transparent;
-      transition: background 0.12s, transform 0.1s;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.18);
+      color: white;
+      font-size: 1.5rem;
+      font-weight: 500;
+      border-radius: 16px;
+      padding: 17px 0;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.1s, transform 0.08s;
       text-align: center;
     }
-    .key:active { background: rgba(255,255,255,0.35); transform: scale(0.93); }
-    .key.del { font-size: 1.2rem; background: rgba(255,60,60,0.2); }
+    .key:active { background: rgba(255,255,255,0.28); transform: scale(0.92); }
+    .key.del { font-size: 1.1rem; background: rgba(0,0,0,0.15); }
     .key.empty { visibility: hidden; }
 
     #pinError {
-      color: #ff8a80; font-size: 0.9rem;
-      margin-top: 1.2rem; min-height: 1.2em; text-align: center;
+      color: #FFCCBC;
+      font-size: 0.85rem;
+      margin-top: 1.25rem;
+      min-height: 1.2em;
+      text-align: center;
     }
 
-    /* ── MAIN APP ── */
-    #mainApp { flex-direction: column; min-height: 100vh; }
+    /* ════════════════════════════════════════
+       MAIN APP — SHELL
+    ════════════════════════════════════════ */
+    #mainApp { flex-direction: column; min-height: 100vh; background: var(--surface); }
 
-    header {
-      background-color: #1e90ff;
-      color: white; padding: 1rem;
-      text-align: center; font-size: 1.3rem;
+    /* Saffron header */
+    .app-header {
+      background: var(--saffron);
+      padding: 0.9rem 1rem 1.1rem;
+      position: relative;
     }
 
-    main { padding: 1rem; flex: 1; }
+    .app-header-brand {
+      font-size: 0.6rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.65);
+      margin-bottom: 0.15rem;
+    }
 
+    .app-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .app-header-name {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: white;
+    }
+
+    .app-header-date {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.7);
+      margin-top: 0.15rem;
+    }
+
+    .app-header-avatar {
+      width: 36px; height: 36px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: white;
+      letter-spacing: 0.02em;
+      flex-shrink: 0;
+    }
+
+    /* App sub-screens */
+    .app-body { flex: 1; padding: 1rem; }
     .app-screen { display: none; }
     .app-screen.active { display: block; }
 
-    input, button, select {
-      width: 100%; padding: 10px; margin: 10px 0;
-      border-radius: 8px; border: 1px solid #ccc; font-size: 1rem;
-    }
-    button { background-color: #28a745; color: white; border: none; cursor: pointer; }
-    button:hover { background-color: #218838; }
+    /* ════════════════════════════════════════
+       SCREEN 1 — ORDER INFO
+    ════════════════════════════════════════ */
+    .field-group { margin-bottom: 0.75rem; }
 
-    .product-card {
-      padding: 0.5rem; background-color: #fff;
-      border: 1px solid #ddd; margin-bottom: 0.5rem;
-      border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    .cart-item-actions button {
-      background: transparent; color: #007bff;
-      border: none; font-size: 1rem;
-      width: auto; padding: 4px 8px; margin: 0;
+    .field-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--ink3);
+      margin-bottom: 0.3rem;
+      display: block;
     }
 
-    .row { display: flex; gap: 10px; }
-    .row > div { flex: 1; }
+    .field-label span {
+      font-weight: 400;
+      text-transform: none;
+      letter-spacing: 0;
+      color: var(--ink3);
+      font-size: 0.68rem;
+    }
 
+    .field-input {
+      width: 100%;
+      padding: 0.75rem 0.9rem;
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      font-size: 0.95rem;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.15s;
+      -webkit-appearance: none;
+    }
+    .field-input:focus { border-color: var(--saffron); }
+    .field-input[readonly] { background: #F5F5F5; color: var(--ink2); }
+
+    .mode-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 1.25rem;
+    }
+
+    .mode-btn {
+      flex: 1;
+      border: none;
+      border-radius: 14px;
+      padding: 1rem 0.5rem;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.35rem;
+      transition: transform 0.1s, opacity 0.1s;
+      width: auto;
+      margin: 0;
+    }
+    .mode-btn:active { transform: scale(0.96); opacity: 0.88; }
+
+    .mode-btn.order {
+      background: var(--saffron);
+    }
+    .mode-btn.check {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+    }
+
+    .mode-icon { font-size: 1.5rem; line-height: 1; }
+
+    .mode-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .mode-btn.order .mode-label { color: white; }
+    .mode-btn.check .mode-label { color: var(--ink2); }
+
+    .mode-sub {
+      font-size: 0.65rem;
+    }
+    .mode-btn.order .mode-sub { color: rgba(255,255,255,0.7); }
+    .mode-btn.check .mode-sub { color: var(--ink3); }
+
+    /* ════════════════════════════════════════
+       SCREEN 2 — SEARCH
+    ════════════════════════════════════════ */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 0.75rem;
+    }
+
+    .back-btn {
+      width: 36px; height: 36px; min-width: 36px;
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      cursor: pointer;
+      padding: 0; margin: 0;
+      color: var(--ink2);
+      flex-shrink: 0;
+    }
+    .back-btn:active { background: var(--surface); transform: scale(0.94); }
+    .back-btn:hover { background: var(--surface); }
+
+    .search-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color 0.15s;
+    }
+    .search-wrap:focus-within { border-color: var(--saffron); }
+
+    .search-icon {
+      padding: 0 0 0 0.75rem;
+      color: var(--ink3);
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    #search {
+      flex: 1;
+      border: none;
+      outline: none;
+      padding: 0.7rem 0.5rem;
+      font-size: 0.9rem;
+      background: transparent;
+      color: var(--ink);
+      width: 100%;
+      margin: 0;
+      border-radius: 0;
+    }
+
+    .search-clear {
+      width: 32px; height: 32px; min-width: 32px;
+      background: var(--ink3);
+      border: none;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem;
+      cursor: pointer;
+      color: white;
+      margin: 0 4px;
+      padding: 0;
+      flex-shrink: 0;
+    }
+    .search-clear:active { background: var(--red); transform: scale(0.9); }
+    .search-clear:hover { background: var(--red); }
+
+    /* Mode pill */
+    .mode-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      margin-bottom: 0.6rem;
+    }
+    .mode-pill.check { background: var(--amber-lt); color: #7B5800; }
+    .mode-pill.order { background: var(--saffron-lt); color: var(--saffron-dark); }
+
+    /* Product suggestion cards */
+    .suggestion-card {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 0.75rem 0.9rem;
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      transition: border-color 0.12s, background 0.12s;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .suggestion-card:active { border-color: var(--saffron); background: var(--saffron-pale); }
+
+    .sc-left { flex: 1; min-width: 0; }
+    .sc-brand { font-size: 0.9rem; font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sc-company { font-size: 0.72rem; color: var(--ink3); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sc-tags { display: flex; gap: 5px; margin-top: 6px; flex-wrap: wrap; }
+    .sc-tag { font-size: 0.68rem; font-weight: 600; padding: 2px 7px; border-radius: 6px; }
+    .sc-tag.rate  { background: var(--red-lt);   color: var(--red); }
+    .sc-tag.mrp   { background: var(--blue-lt);  color: var(--blue); }
+    .sc-tag.stock { background: var(--green-lt); color: var(--green); }
+
+    .sc-right { flex-shrink: 0; text-align: right; padding-left: 8px; }
+    .sc-rate-big { font-size: 1rem; font-weight: 700; color: var(--red); }
+    .sc-arrow { font-size: 0.7rem; color: var(--ink3); margin-top: 2px; }
+
+    /* Selected product panel */
+    .selected-panel {
+      background: var(--white);
+      border: 1.5px solid var(--saffron);
+      border-radius: 16px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .sp-name { font-size: 0.95rem; font-weight: 700; color: var(--ink); }
+    .sp-company { font-size: 0.75rem; color: var(--ink3); margin-bottom: 0.6rem; }
+
+    .sp-prices {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 0.75rem;
+    }
+    .sp-price {
+      flex: 1;
+      background: var(--surface);
+      border-radius: 10px;
+      padding: 0.5rem;
+      text-align: center;
+    }
+    .sp-price-label { font-size: 0.6rem; color: var(--ink3); text-transform: uppercase; letter-spacing: 0.05em; }
+    .sp-price-val { font-size: 1rem; font-weight: 700; margin-top: 1px; }
+    .sp-price-val.rate  { color: var(--red); }
+    .sp-price-val.mrp   { color: var(--blue); }
+    .sp-price-val.stock { color: var(--green); }
+
+    /* Order entry fields */
+    .entry-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 0.75rem; }
+    .entry-grid-3 { grid-column: 1 / -1; }
+
+    .entry-field { display: flex; flex-direction: column; gap: 4px; }
+    .entry-field label { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink3); }
+    .entry-field input, .entry-field select {
+      padding: 0.6rem 0.7rem;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.9rem;
+      color: var(--ink);
+      background: var(--white);
+      width: 100%;
+      margin: 0;
+      -webkit-appearance: none;
+      outline: none;
+    }
+    .entry-field input:focus, .entry-field select:focus { border-color: var(--saffron); }
+
+    /* Action buttons */
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 0.8rem;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 6px 0 0;
+      transition: opacity 0.1s, transform 0.1s;
+      letter-spacing: 0.01em;
+    }
+    .btn:active { opacity: 0.85; transform: scale(0.98); }
+    .btn:hover { opacity: 0.92; }
+
+    .btn-saffron { background: var(--saffron); color: white; }
+    .btn-amber  { background: var(--amber); color: #3E2000; }
+    .btn-green  { background: var(--green); color: white; }
+    .btn-outline {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      color: var(--ink2);
+    }
+    .btn-red { background: var(--red); color: white; }
+
+    /* Cart */
+    .cart-section-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--ink3);
+      margin: 1rem 0 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .cart-count {
+      background: var(--saffron);
+      color: white;
+      font-size: 0.6rem;
+      padding: 1px 6px;
+      border-radius: 20px;
+    }
+
+    .cart-card {
+      background: var(--white);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 0.75rem 0.9rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .cart-card-main { flex: 1; min-width: 0; }
+    .cart-card-name { font-size: 0.85rem; font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cart-card-meta { font-size: 0.72rem; color: var(--ink3); margin-top: 2px; }
+
+    .cart-remove {
+      width: 30px; height: 30px;
+      border: none;
+      background: var(--red-lt);
+      color: var(--red);
+      border-radius: 8px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      padding: 0; margin: 0; width: auto;
+    }
+    .cart-remove:hover { background: var(--red); color: white; }
+
+    /* Batch modal */
     #batchModal {
-      display: none; position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.6); z-index: 9999;
+      display: none;
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 9999;
+      align-items: flex-end;
+      justify-content: center;
     }
-    #batchModal .modal-inner {
-      background: white; margin: 5% auto; padding: 15px;
-      width: 95%; max-height: 80%; overflow: auto; border-radius: 10px;
+    #batchModal.open { display: flex; }
+
+    .modal-sheet {
+      background: white;
+      width: 100%;
+      max-height: 80vh;
+      border-radius: 20px 20px 0 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
+
+    .modal-handle {
+      width: 36px; height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: 0.75rem auto 0;
+    }
+
+    .modal-header {
+      padding: 0.5rem 1rem 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-title { font-size: 1rem; font-weight: 700; color: var(--saffron-dark); }
+    .modal-close {
+      background: var(--surface); border: none;
+      width: 30px; height: 30px; border-radius: 50%;
+      font-size: 0.9rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      padding: 0; margin: 0; width: auto; color: var(--ink2);
+    }
+    .modal-close:hover { background: var(--red-lt); color: var(--red); }
+
+    .modal-body { overflow-y: auto; padding: 0.75rem 1rem 1.5rem; }
+
+    .batch-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .batch-table th {
+      text-align: left;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--ink3);
+      font-weight: 600;
+      padding: 0 0 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .batch-table td {
+      padding: 9px 0;
+      border-bottom: 1px solid var(--border);
+      color: var(--ink);
+      vertical-align: middle;
+    }
+    .batch-table tr:last-child td { border-bottom: none; }
+    .batch-qty  { font-weight: 700; color: var(--green); }
+    .batch-exp  { font-weight: 600; color: var(--red); }
+    .batch-cost { color: var(--saffron-dark); font-weight: 600; }
+    .batch-no   { font-size: 0.8rem; color: var(--ink2); }
   </style>
 </head>
 <body>
 
-  <!-- INSTALL WALL -->
+  <!-- ══════════════════════════════════════
+       INSTALL WALL
+  ══════════════════════════════════════ -->
   <div class="screen" id="installWall">
-    <div class="logo">💊</div>
-    <h1>Ishwar Pharma</h1>
-    <p class="sub">Install the app to continue</p>
+    <div class="iw-brand">Ishwar Pharma</div>
+    <div class="iw-logo">💊</div>
+    <h1>Field Order App</h1>
+    <p class="sub">Install to your home screen to get started</p>
 
-    <div class="install-card" id="androidInstall" style="display:none">
-      <h2>📲 Install on your device</h2>
-      <p style="margin-bottom:1rem; opacity:0.85; font-size:0.9rem;">
-        Tap the button below to install. This is required before you can use the app.
+    <div class="iw-card" id="androidInstall" style="display:none">
+      <h2>📲 Install on Android</h2>
+      <p style="font-size:0.85rem; color:#555; margin-bottom:1rem; line-height:1.5;">
+        Tap the button below. The app installs in seconds — no Play Store needed.
       </p>
-      <button id="installBtn">⬇️ Install App</button>
+      <button id="installBtn">⬇ Install App</button>
     </div>
 
-    <div class="install-card" id="iosInstall" style="display:none">
+    <div class="iw-card" id="iosInstall" style="display:none">
       <h2>📲 Add to Home Screen</h2>
       <ul class="ios-steps">
         <li><span class="num">1</span><span>Tap the <strong>Share</strong> button ⬆ at the bottom of Safari</span></li>
-        <li><span class="num">2</span><span>Scroll down and tap <strong>"Add to Home Screen"</strong></span></li>
-        <li><span class="num">3</span><span>Tap <strong>"Add"</strong> in the top right corner</span></li>
+        <li><span class="num">2</span><span>Scroll and tap <strong>"Add to Home Screen"</strong></span></li>
+        <li><span class="num">3</span><span>Tap <strong>"Add"</strong> in the top-right corner</span></li>
         <li><span class="num">4</span><span>Open <strong>Ishwar Pharma</strong> from your home screen</span></li>
       </ul>
     </div>
 
-    <div class="install-card" id="genericInstall" style="display:none">
+    <div class="iw-card" id="genericInstall" style="display:none">
       <h2>📱 Open on mobile</h2>
-      <p style="opacity:0.85; font-size:0.95rem; line-height:1.5;">
-        Please open this app on your Android or iPhone and install it to your home screen before use.
+      <p style="font-size:0.9rem; color:#555; line-height:1.5;">
+        Please open this on your Android or iPhone and install it to your home screen before use.
       </p>
     </div>
 
-    <p style="opacity:0.5; font-size:0.75rem; margin-top:1rem;">
-      Ishwar Pharma · Secure Field Order App
+    <p style="opacity:0.5; font-size:0.7rem; margin-top:1.5rem; color:white;">
+      Secure · Offline-ready · Field use only
     </p>
   </div>
 
-  <!-- PIN SCREEN -->
+  <!-- ══════════════════════════════════════
+       PIN SCREEN
+  ══════════════════════════════════════ -->
   <div class="screen" id="pinScreen">
+    <div class="pin-brand">Ishwar Pharma</div>
     <div class="pin-logo">🔐</div>
     <div class="pin-title">Enter your PIN</div>
-    <div class="pin-sub">8-digit PIN to access your orders</div>
+    <div class="pin-sub">8-digit secure PIN</div>
     <div class="pin-dots" id="pinDots"></div>
     <div class="keypad">
       <div class="key" onclick="pinKey('1')">1</div>
@@ -227,125 +756,171 @@
     <div id="pinError"></div>
   </div>
 
-  <!-- MAIN APP -->
+  <!-- ══════════════════════════════════════
+       MAIN APP
+  ══════════════════════════════════════ -->
   <div class="screen" id="mainApp">
-    <header>📝 Ishwar Pharma Order Form</header>
-    <main>
-      <div class="app-screen active" id="appScreen1">
-        <label>Date:</label>
-        <input type="text" id="date" readonly>
-        <label>Salesman Name:</label>
-        <input type="text" id="salesman" readonly style="background:#e9ecef; color:#555;">
-        <label>Party Name: <span style="color:#999;font-weight:normal;font-size:0.85rem;">(required for ordering)</span></label>
-        <input type="text" id="party" placeholder="Optional for rate check">
-        <label>Place/District: <span style="color:#999;font-weight:normal;font-size:0.85rem;">(required for ordering)</span></label>
-        <input type="text" id="place" placeholder="Optional for rate check">
 
-        <div style="display:flex; gap:10px; margin-top:6px;">
-          <button onclick="startMode('order')"
-                  style="flex:1; background:#1e90ff; font-size:1rem; padding:14px 10px; border-radius:10px;">
-            🛒 Place Order
+    <!-- Saffron header -->
+    <div class="app-header">
+      <div class="app-header-brand">Ishwar Pharma</div>
+      <div class="app-header-row">
+        <div>
+          <div class="app-header-name" id="headerName">—</div>
+          <div class="app-header-date" id="headerDate">—</div>
+        </div>
+        <div class="app-header-avatar" id="headerAvatar">—</div>
+      </div>
+    </div>
+
+    <div class="app-body">
+
+      <!-- SCREEN 1: Order Info -->
+      <div class="app-screen active" id="appScreen1">
+
+        <div class="field-group">
+          <label class="field-label">Party Name <span>(required for ordering)</span></label>
+          <input class="field-input" type="text" id="party" placeholder="e.g. Ramesh Medical Store">
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Place / District <span>(required for ordering)</span></label>
+          <input class="field-input" type="text" id="place" placeholder="e.g. Pune">
+        </div>
+
+        <input type="hidden" id="date">
+        <input type="hidden" id="salesman">
+
+        <div class="mode-row">
+          <button class="mode-btn order" onclick="startMode('order')">
+            <span class="mode-icon">🛒</span>
+            <span class="mode-label">Place Order</span>
+            <span class="mode-sub">Create &amp; download PDF</span>
           </button>
-          <button onclick="startMode('check')"
-                  style="flex:1; background:#6c757d; font-size:1rem; padding:14px 10px; border-radius:10px;">
-            🔍 Check Rates
+          <button class="mode-btn check" onclick="startMode('check')">
+            <span class="mode-icon">🔍</span>
+            <span class="mode-label">Check Rates</span>
+            <span class="mode-sub">Stock, rate &amp; expiry</span>
           </button>
         </div>
+
       </div>
 
+      <!-- SCREEN 2: Search & Cart -->
       <div class="app-screen" id="appScreen2">
 
-        <!-- Mode banner -->
-        <div id="modeBanner" style="
-          display:none;
-          background:#fff3cd; border:1px solid #ffc107;
-          border-radius:8px; padding:10px 12px; margin-bottom:8px;
-          font-size:0.9rem; color:#856404;
-          display:flex; justify-content:space-between; align-items:center;
-        ">
-          <span>👁️ <b>Rate Check Mode</b> — tap a product to see batch details</span>
-          <button onclick="goBack()" style="
-            width:auto; padding:4px 10px; margin:0;
-            background:#6c757d; color:white; font-size:0.8rem; border-radius:6px;">
-            ← Back
-          </button>
+        <!-- Top bar: back + search -->
+        <div class="top-bar">
+          <button class="back-btn" onclick="goBack()">←</button>
+          <div class="search-wrap">
+            <span class="search-icon">🔍</span>
+            <input id="search" type="text" oninput="filterProducts()" placeholder="Brand or company…" autocomplete="off">
+            <button class="search-clear" onclick="resetSearch()">✕</button>
+          </div>
         </div>
 
-        <div id="orderBanner" style="display:none; margin-bottom:6px;">
-          <button onclick="goBack()" style="
-            width:auto; padding:6px 14px; margin:0;
-            background:#6c757d; color:white; font-size:0.85rem; border-radius:6px;">
-            ← Back
-          </button>
-        </div>
+        <!-- Mode pill -->
+        <div id="modePillCheck" class="mode-pill check" style="display:none">🔍 Rate Check Mode</div>
+        <div id="modePillOrder" class="mode-pill order" style="display:none">🛒 Order Mode</div>
 
-        <div style="display:flex; align-items:center; gap:5px;">
-          <input type="text" id="search" oninput="filterProducts()"
-                 placeholder="Enter brand name and company name"
-                 style="flex:1; padding:8px; font-size:16px; border-radius:4px; border:1px solid #ccc; margin:0;">
-          <button onclick="resetSearch()"
-                  style="width:28px; height:28px; background:red; color:white;
-                         border:none; font-size:18px; font-weight:bold;
-                         cursor:pointer; border-radius:50%;
-                         display:flex; align-items:center; justify-content:center; padding:0; margin:0;">
-            ✖
-          </button>
-        </div>
-
+        <!-- Search results -->
         <div id="suggestions"></div>
 
-        <!-- Order-only entry form -->
+        <!-- Selected product — ORDER mode entry -->
         <div id="entryForm" style="display:none">
-          <div id="rateInfo" style="font-weight:bold; margin-bottom:10px; color:#0055aa;"></div>
-          <div class="row">
-            <div>
-              <label>Qty</label>
-              <input type="number" inputmode="decimal" id="qty">
-              <select id="qtyType">
-                <option value="Units">Units</option>
-                <option value="Box">Box</option>
-                <option value="Case">Case</option>
-              </select>
-              <button onclick="handleBatchKYC()" style="margin-top:5px; background-color:#fd7e14; color:white;">
-                📦 Batch KYC
-              </button>
+          <div class="selected-panel">
+            <div class="sp-name" id="sp-name"></div>
+            <div class="sp-company" id="sp-company"></div>
+            <div class="sp-prices">
+              <div class="sp-price">
+                <div class="sp-price-label">Rate</div>
+                <div class="sp-price-val rate" id="sp-rate">—</div>
+              </div>
+              <div class="sp-price">
+                <div class="sp-price-label">MRP</div>
+                <div class="sp-price-val mrp" id="sp-mrp">—</div>
+              </div>
+              <div class="sp-price">
+                <div class="sp-price-label">Stock</div>
+                <div class="sp-price-val stock" id="sp-stock">—</div>
+              </div>
             </div>
-            <div>
-              <label>Discount %</label>
-              <input type="number" inputmode="decimal" id="disc">
+            <div class="entry-grid">
+              <div class="entry-field">
+                <label>Qty</label>
+                <input type="number" inputmode="decimal" id="qty" placeholder="0">
+              </div>
+              <div class="entry-field">
+                <label>Pack type</label>
+                <select id="qtyType">
+                  <option value="Units">Units</option>
+                  <option value="Box">Box</option>
+                  <option value="Case">Case</option>
+                </select>
+              </div>
+              <div class="entry-field">
+                <label>Discount %</label>
+                <input type="number" inputmode="decimal" id="disc" placeholder="0">
+              </div>
+              <div class="entry-field">
+                <label>Special Rate</label>
+                <input type="number" inputmode="decimal" id="splRate" placeholder="—">
+              </div>
             </div>
-            <div>
-              <label>Special Rate</label>
-              <input type="number" inputmode="decimal" id="splRate">
-            </div>
+            <button class="btn btn-amber" onclick="handleBatchKYC()">📦 View Batch &amp; Expiry</button>
+            <button class="btn btn-saffron" onclick="addToCart()">+ Add to Cart</button>
           </div>
-          <button onclick="addToCart()">➕ Add to Cart</button>
         </div>
 
-        <!-- Check-mode: batch popup trigger -->
+        <!-- Selected product — CHECK mode info -->
         <div id="checkEntryForm" style="display:none">
-          <div id="checkRateInfo" style="font-weight:bold; margin:10px 0; color:#0055aa; font-size:1rem;"></div>
-          <button onclick="handleBatchKYC()" style="background-color:#fd7e14; color:white;">
-            📦 View Batch & Expiry
-          </button>
+          <div class="selected-panel">
+            <div class="sp-name" id="csp-name"></div>
+            <div class="sp-company" id="csp-company"></div>
+            <div class="sp-prices">
+              <div class="sp-price">
+                <div class="sp-price-label">Rate</div>
+                <div class="sp-price-val rate" id="csp-rate">—</div>
+              </div>
+              <div class="sp-price">
+                <div class="sp-price-label">MRP</div>
+                <div class="sp-price-val mrp" id="csp-mrp">—</div>
+              </div>
+              <div class="sp-price">
+                <div class="sp-price-label">Stock</div>
+                <div class="sp-price-val stock" id="csp-stock">—</div>
+              </div>
+            </div>
+            <button class="btn btn-amber" onclick="handleBatchKYC()">📦 View Batch &amp; Expiry</button>
+          </div>
         </div>
 
         <!-- Cart (order mode only) -->
-        <div id="cartSection">
-          <h3>🛒 Cart</h3>
+        <div id="cartSection" style="display:none">
+          <div class="cart-section-label">
+            Cart <span class="cart-count" id="cartCount">0</span>
+          </div>
           <div id="cart"></div>
-          <button onclick="finalizeOrder()">📥 Finalise &amp; Download PDF</button>
+          <button class="btn btn-green" onclick="finalizeOrder()" style="margin-top:0.5rem;">
+            📥 Finalise &amp; Download PDF
+          </button>
         </div>
+
       </div>
-    </main>
+    </div>
   </div>
 
-  <!-- BATCH MODAL -->
+  <!-- BATCH BOTTOM SHEET -->
   <div id="batchModal">
-    <div class="modal-inner">
-      <h3>📦 Batch Details</h3>
-      <div id="batchContent"></div>
-      <button onclick="closeBatchModal()" style="background:#dc3545; margin-top:10px;">❌ Close</button>
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <div class="modal-title">📦 Batch Details</div>
+        <button class="modal-close" onclick="closeBatchModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="batchContent"></div>
+      </div>
     </div>
   </div>
 
@@ -370,7 +945,7 @@
     document.getElementById(id).classList.add('active');
   }
 
-  /* ══ INSTALL WALL ══════════════════════════════════════════ */
+  /* ── Install wall ── */
   let deferredPrompt = null;
   window.addEventListener('beforeinstallprompt', e => {
     e.preventDefault();
@@ -380,14 +955,9 @@
   function decideFirstScreen() {
     if (isStandalone) { bootApp(); return; }
     show('installWall');
-    if (isIOS) {
-      document.getElementById('iosInstall').style.display = 'block';
-    } else if (isAndroid) {
-      document.getElementById('androidInstall').style.display = 'block';
-    } else {
-      // Desktop: allow through for testing/admin; or change to genericInstall to block
-      bootApp();
-    }
+    if (isIOS)     document.getElementById('iosInstall').style.display = 'block';
+    else if (isAndroid) document.getElementById('androidInstall').style.display = 'block';
+    else           bootApp(); // desktop — let through
   }
 
   document.getElementById('installBtn').addEventListener('click', async () => {
@@ -397,24 +967,19 @@
     deferredPrompt = null;
   });
 
-  /* ══ BOOT ═══════════════════════════════════════════════════ */
+  /* ── Boot ── */
   let currentUser = null;
 
   function bootApp() {
     const saved = localStorage.getItem('ip_user');
     if (saved) {
-      try {
-        currentUser = JSON.parse(saved);
-        launchMainApp();
-        return;
-      } catch(e) {
-        localStorage.removeItem('ip_user');
-      }
+      try { currentUser = JSON.parse(saved); launchMainApp(); return; }
+      catch(e) { localStorage.removeItem('ip_user'); }
     }
     showPinScreen();
   }
 
-  /* ══ PIN SCREEN ═════════════════════════════════════════════ */
+  /* ── PIN ── */
   let pinEntry = '';
   const PIN_LEN = 8;
   let usersData = [];
@@ -433,30 +998,26 @@
     c.innerHTML = '';
     for (let i = 0; i < PIN_LEN; i++) {
       const d = document.createElement('div');
-      d.className = 'pin-dot';
-      d.id = 'dot-' + i;
+      d.className = 'pin-dot'; d.id = 'dot-' + i;
       c.appendChild(d);
     }
   }
 
   function refreshDots() {
-    for (let i = 0; i < PIN_LEN; i++) {
+    for (let i = 0; i < PIN_LEN; i++)
       document.getElementById('dot-' + i).classList.toggle('filled', i < pinEntry.length);
-    }
   }
 
   function pinKey(digit) {
     if (pinEntry.length >= PIN_LEN) return;
-    pinEntry += digit;
-    refreshDots();
+    pinEntry += digit; refreshDots();
     document.getElementById('pinError').textContent = '';
     if (pinEntry.length === PIN_LEN) checkPin();
   }
 
   function pinDel() {
     if (!pinEntry.length) return;
-    pinEntry = pinEntry.slice(0, -1);
-    refreshDots();
+    pinEntry = pinEntry.slice(0, -1); refreshDots();
     document.getElementById('pinError').textContent = '';
   }
 
@@ -465,26 +1026,30 @@
     if (match) {
       currentUser = { name: match.name, companies: match.companies };
       localStorage.setItem('ip_user', JSON.stringify(currentUser));
-      pinEntry = '';
-      refreshDots();
+      pinEntry = ''; refreshDots();
       launchMainApp();
     } else {
-      document.getElementById('pinError').textContent = '❌ Incorrect PIN. Try again.';
-      setTimeout(() => {
-        pinEntry = '';
-        refreshDots();
-        document.getElementById('pinError').textContent = '';
-      }, 900);
+      document.getElementById('pinError').textContent = 'Incorrect PIN — try again';
+      setTimeout(() => { pinEntry = ''; refreshDots(); document.getElementById('pinError').textContent = ''; }, 900);
     }
   }
 
-  /* ══ MAIN APP ════════════════════════════════════════════════ */
+  /* ── Main App ── */
   let stockData = [], cart = [], selectedProduct = null, batchData = [];
 
   function launchMainApp() {
     show('mainApp');
-    document.getElementById('date').value = new Date().toISOString().split('T')[0];
+    const today = new Date();
+    const dateStr = today.toISOString().split('T')[0];
+    const displayDate = today.toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+    document.getElementById('date').value    = dateStr;
     document.getElementById('salesman').value = currentUser.name;
+    document.getElementById('headerName').textContent = 'Hello, ' + currentUser.name;
+    document.getElementById('headerDate').textContent = displayDate;
+    document.getElementById('headerAvatar').textContent =
+      currentUser.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+
     fetchExcel();
     fetchBatch();
   }
@@ -492,8 +1057,7 @@
   function isCompanyAllowed(company) {
     if (!currentUser) return false;
     if (currentUser.companies === 'ALL') return true;
-    const allowed = currentUser.companies.map(c => c.toLowerCase());
-    return allowed.some(c => company.toLowerCase().includes(c));
+    return currentUser.companies.some(c => company.toLowerCase().includes(c.toLowerCase()));
   }
 
   async function fetchExcel() {
@@ -506,9 +1070,8 @@
       json.forEach(row => {
         if (row[1] && row[13] && row[12] && row[10]) {
           const company = String(row[13] || '');
-          if (isCompanyAllowed(company)) {
+          if (isCompanyAllowed(company))
             stockData.push({ brand: row[1], company, rate: row[12], mrp: row[10], stock: row[3] });
-          }
         }
       });
     } catch(e) { console.error('fetchExcel:', e); }
@@ -537,6 +1100,7 @@
     return new Date(e);
   }
 
+  /* ── Mode switching ── */
   let appMode = 'order';
 
   function startMode(mode) {
@@ -551,9 +1115,9 @@
     appMode = mode;
     document.getElementById('appScreen1').classList.remove('active');
     document.getElementById('appScreen2').classList.add('active');
-    document.getElementById('modeBanner').style.display  = mode === 'check' ? 'flex' : 'none';
-    document.getElementById('orderBanner').style.display = mode === 'order' ? 'block' : 'none';
-    document.getElementById('cartSection').style.display = mode === 'order' ? 'block' : 'none';
+    document.getElementById('modePillCheck').style.display = mode === 'check' ? 'inline-flex' : 'none';
+    document.getElementById('modePillOrder').style.display = mode === 'order' ? 'inline-flex' : 'none';
+    document.getElementById('cartSection').style.display   = mode === 'order' ? 'block' : 'none';
     resetSearch();
   }
 
@@ -565,11 +1129,12 @@
     resetSearch();
   }
 
+  /* ── Search ── */
   function highlightText(text, token) {
     if (!token) return String(text);
     const esc = token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     return String(text).replace(new RegExp('(' + esc + ')', 'gi'),
-      '<mark style="background:yellow;padding:0;font-weight:bold;">$1</mark>');
+      '<mark style="background:#FFE082;padding:0;border-radius:2px;">$1</mark>');
   }
 
   function filterProducts() {
@@ -587,56 +1152,71 @@
     });
     matches.slice(0, 200).forEach(p => {
       const div = document.createElement('div');
-      div.className = 'product-card';
-      div.innerHTML = `<span style="display:inline-block;min-width:300px;text-align:left;">
-        ${highlightText(p.brand||'', brandToken)} | ${highlightText(p.company||'', companyToken)} |
-        <b style="color:red;">Rate: ${Number(p.rate).toFixed(2)}</b> |
-        <b style="color:blue;">MRP: ${Number(p.mrp).toFixed(2)}</b> |
-        <b style="color:green;">Stock: ${p.stock||'-'}</b>
-      </span>`;
-      div.onclick = () => {
-        selectedProduct = p;
-        container.innerHTML = '';
-        document.getElementById('search').value = `${p.brand} | ${p.company}`;
-        if (appMode === 'check') {
-          document.getElementById('entryForm').style.display = 'none';
-          document.getElementById('checkEntryForm').style.display = 'block';
-          document.getElementById('checkRateInfo').innerHTML =
-            `<b>${p.brand}</b> — ${p.company}<br>
-            💰 Rate: ₹${Number(p.rate).toFixed(2)} &nbsp;|&nbsp;
-            🏷️ MRP: ₹${Number(p.mrp).toFixed(2)} &nbsp;|&nbsp;
-            📦 Stock: ${p.stock || '-'}`;
-        } else {
-          document.getElementById('checkEntryForm').style.display = 'none';
-          document.getElementById('entryForm').style.display = 'block';
-          document.getElementById('rateInfo').innerHTML =
-            `💰 <b>Rate:</b> ₹${p.rate} &nbsp;&nbsp; 🏷️ <b>MRP:</b> ₹${p.mrp}`;
-        }
-      };
+      div.className = 'suggestion-card';
+      div.innerHTML = `
+        <div class="sc-left">
+          <div class="sc-brand">${highlightText(p.brand||'', brandToken)}</div>
+          <div class="sc-company">${highlightText(p.company||'', companyToken)}</div>
+          <div class="sc-tags">
+            <span class="sc-tag rate">₹${Number(p.rate).toFixed(2)}</span>
+            <span class="sc-tag mrp">MRP ₹${Number(p.mrp).toFixed(2)}</span>
+            <span class="sc-tag stock">Stock: ${p.stock||'-'}</span>
+          </div>
+        </div>
+        <div class="sc-right">
+          <div class="sc-arrow">›</div>
+        </div>`;
+      div.onclick = () => selectProduct(p);
       container.appendChild(div);
     });
+  }
+
+  function selectProduct(p) {
+    selectedProduct = p;
+    document.getElementById('suggestions').innerHTML = '';
+    document.getElementById('search').value = p.brand;
+
+    if (appMode === 'check') {
+      document.getElementById('entryForm').style.display = 'none';
+      document.getElementById('checkEntryForm').style.display = 'block';
+      document.getElementById('csp-name').textContent = p.brand;
+      document.getElementById('csp-company').textContent = p.company;
+      document.getElementById('csp-rate').textContent  = '₹' + Number(p.rate).toFixed(2);
+      document.getElementById('csp-mrp').textContent   = '₹' + Number(p.mrp).toFixed(2);
+      document.getElementById('csp-stock').textContent = p.stock || '—';
+    } else {
+      document.getElementById('checkEntryForm').style.display = 'none';
+      document.getElementById('entryForm').style.display = 'block';
+      document.getElementById('sp-name').textContent = p.brand;
+      document.getElementById('sp-company').textContent = p.company;
+      document.getElementById('sp-rate').textContent  = '₹' + Number(p.rate).toFixed(2);
+      document.getElementById('sp-mrp').textContent   = '₹' + Number(p.mrp).toFixed(2);
+      document.getElementById('sp-stock').textContent = p.stock || '—';
+    }
   }
 
   function resetSearch() {
     document.getElementById('search').value = '';
     document.getElementById('suggestions').innerHTML = '';
+    document.getElementById('entryForm').style.display = 'none';
+    document.getElementById('checkEntryForm').style.display = 'none';
+    selectedProduct = null;
   }
 
+  /* ── Cart ── */
   function addToCart() {
     try {
       if (!selectedProduct) { alert('Please select a product first.'); return; }
       const qty = document.getElementById('qty').value;
       if (!qty && !confirm('Quantity is empty. Add anyway?')) return;
-      const disc = document.getElementById('disc').value || '';
+      const disc    = document.getElementById('disc').value || '';
       const splRate = document.getElementById('splRate').value || '';
-      const packEl = document.getElementById('qtyType');
+      const packEl  = document.getElementById('qtyType');
       cart.push({ ...selectedProduct, qty, pack: packEl ? packEl.value : '', disc, splRate });
-      document.getElementById('entryForm').style.display = 'none';
       ['qty','disc','splRate'].forEach(id => document.getElementById(id).value = '');
       if (packEl) packEl.selectedIndex = 0;
-      document.getElementById('search').value = '';
-      document.getElementById('suggestions').innerHTML = '';
       selectedProduct = null;
+      resetSearch();
       renderCart();
     } catch(err) { console.error(err); alert('Something went wrong.'); }
   }
@@ -644,16 +1224,23 @@
   function renderCart() {
     const c = document.getElementById('cart');
     c.innerHTML = '';
+    document.getElementById('cartCount').textContent = cart.length;
     cart.forEach((item, i) => {
       const div = document.createElement('div');
-      div.className = 'product-card';
-      div.innerHTML = `${i+1}. ${item.brand} (${item.company}) - Qty: ${item.qty} ${item.pack||''} | Rate: ₹${item.rate} | Spl: ₹${item.splRate||'-'} | Disc: ${item.disc||0}% <span class='cart-item-actions'><button onclick='removeItem(${i})'>❌</button></span>`;
+      div.className = 'cart-card';
+      div.innerHTML = `
+        <div class="cart-card-main">
+          <div class="cart-card-name">${item.brand}</div>
+          <div class="cart-card-meta">${item.company} &nbsp;·&nbsp; ${item.qty} ${item.pack||''} &nbsp;·&nbsp; ₹${Number(item.rate).toFixed(2)}${item.splRate ? ' → ₹'+item.splRate : ''} ${item.disc ? '('+item.disc+'% off)' : ''}</div>
+        </div>
+        <button class="cart-remove" onclick="removeItem(${i})">✕</button>`;
       c.appendChild(div);
     });
   }
 
   function removeItem(i) { cart.splice(i, 1); renderCart(); }
 
+  /* ── Batch modal ── */
   function handleBatchKYC() {
     if (!selectedProduct) { alert('Please select a product first'); return; }
     showBatchModal(selectedProduct.brand, selectedProduct.stock);
@@ -670,19 +1257,32 @@
       let use = Math.min(rem, b.qty);
       final.push({...b, use}); rem -= use;
     }
-    let html = `<table style="width:100%;border-collapse:collapse;">
-      <tr style="background:#1e90ff;color:white;"><th>Qty</th><th>Batch</th><th>Expiry</th><th>Cost</th></tr>`;
-    final.forEach(b => { html += `<tr>
-      <td style="color:green">${b.use}</td><td>${b.batch}</td>
-      <td style="color:red">${b.expiry}</td><td style="color:orange">₹${Number(b.cost).toFixed(2)}</td>
-    </tr>`; });
-    html += '</table>';
+    let html = `<table class="batch-table">
+      <thead><tr>
+        <th>Qty</th><th>Batch No</th><th>Expiry</th><th>Cost</th>
+      </tr></thead><tbody>`;
+    if (final.length === 0) {
+      html += `<tr><td colspan="4" style="text-align:center;padding:1.5rem;color:#888;">No valid batches found</td></tr>`;
+    } else {
+      final.forEach(b => {
+        html += `<tr>
+          <td class="batch-qty">${b.use}</td>
+          <td class="batch-no">${b.batch}</td>
+          <td class="batch-exp">${b.expiry}</td>
+          <td class="batch-cost">₹${Number(b.cost).toFixed(2)}</td>
+        </tr>`;
+      });
+    }
+    html += '</tbody></table>';
     document.getElementById('batchContent').innerHTML = html;
-    document.getElementById('batchModal').style.display = 'block';
+    document.getElementById('batchModal').classList.add('open');
   }
 
-  function closeBatchModal() { document.getElementById('batchModal').style.display = 'none'; }
+  function closeBatchModal() {
+    document.getElementById('batchModal').classList.remove('open');
+  }
 
+  /* ── PDF ── */
   async function finalizeOrder() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
@@ -691,26 +1291,26 @@
     const party    = document.getElementById('party').value;
     const place    = document.getElementById('place').value;
 
-    doc.setFontSize(16); doc.text('Ishwar Pharma - Purchase Order', 14, 15);
-    doc.setFontSize(12);
-    doc.text(`Date: ${date}`, 14, 25);
-    doc.text(`Salesman: ${salesman}`, 14, 32);
-    doc.text(`Party: ${party}`, 14, 39);
-    doc.text(`Place: ${place}`, 14, 46);
+    doc.setFontSize(16); doc.text('Ishwar Pharma — Purchase Order', 14, 15);
+    doc.setFontSize(11);
+    doc.text(`Date: ${date}`,        14, 26);
+    doc.text(`Salesman: ${salesman}`, 14, 33);
+    doc.text(`Party: ${party}`,       14, 40);
+    doc.text(`Place: ${place}`,       14, 47);
 
     doc.autoTable({
-      head: [['Sr','Brand','Company','Qty','Rate','Special Rate','Disc%']],
+      head: [['#','Brand','Company','Qty','Rate (₹)','Special Rate','Disc%']],
       body: cart.map((item, i) => [
         i+1, item.brand||'', item.company||'',
         (item.qty||'') + ' ' + (item.pack||''),
         item.rate ? Number(item.rate).toFixed(2) : '',
-        item.splRate ? Number(item.splRate).toFixed(2) : '-',
+        item.splRate ? Number(item.splRate).toFixed(2) : '—',
         (item.disc||0) + '%'
       ]),
       startY: 55,
-      styles: { fontSize: 10, halign: 'left', cellPadding: 2 },
-      headStyles: { fillColor: [0, 102, 204], textColor: 255, fontStyle: 'bold' },
-      columnStyles: { 4: { fontStyle: 'bold' }, 5: { textColor: [255,0,0], fontStyle: 'bold' } }
+      styles: { fontSize: 9, cellPadding: 2 },
+      headStyles: { fillColor: [230, 81, 0], textColor: 255, fontStyle: 'bold' },
+      columnStyles: { 4: { fontStyle: 'bold' }, 5: { textColor: [198,40,40], fontStyle:'bold' } }
     });
 
     const safeParty = party.replace(/[^a-z0-9]/gi, '_');
@@ -718,7 +1318,12 @@
     doc.save(`${safeParty}_${safePlace}.pdf`);
   }
 
-  /* ── BOOT ── */
+  /* ── Tap outside batch modal to close ── */
+  document.getElementById('batchModal').addEventListener('click', function(e) {
+    if (e.target === this) closeBatchModal();
+  });
+
+  /* ── Boot ── */
   decideFirstScreen();
   </script>
 </body>
