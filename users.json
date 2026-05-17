@@ -4,6 +4,7 @@
   { "name": "Vijay",    "pin": "33445566", "companies": ["Theon"] },
   { "name": "Vinayak",  "pin": "44556677", "companies": ["Cadila"] },
   { "name": "Ramesh",   "pin": "55667788", "companies": ["Alkem", "Cadila"] },
-  { "name": "Suresh",   "pin": "66778899", "companies": ["Theon", "Alkem", "Sun Pharma"] },
+  { "name": "Anup",   "pin": "17052009", "companies": ["AKUMENTIS", "AKUMENTIS(NET)"] },
+   { "name": "Suresh",   "pin": "66778899", "companies": ["Theon", "Alkem", "Sun Pharma"] },
   { "name": "Brijesh",   "pin": "09011979", "companies": "ALL" }
 ]
