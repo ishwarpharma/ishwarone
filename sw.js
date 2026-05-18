@@ -1,23 +1,15 @@
 /* ============================================================
-   sw.js — Ishwar Pharma PWA Service Worker v3
-   - Install never fails: each file cached individually
-   - HTML/JSON: network-first with cache fallback
-   - Assets: cache-first with background refresh
-   - Bump CACHE_NAME to force all users to update
+   sw.js — Ishwar Pharma PWA Service Worker
+   Strategy: Network-first for HTML/JS, Cache-first for assets.
+   Cache name bump forces update for all users automatically.
    ============================================================ */
 
-const CACHE_NAME = 'ishwarpharma-v3';
-
-/* Core files — app cannot work without these */
-const CORE = [
+const CACHE_NAME = 'ishwarpharma-v1';
+const PRECACHE = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/users.json'
-];
-
-/* Best-effort files — cache if possible, ok to fail */
-const OPTIONAL = [
+  '/users.json',
   '/stock.xlsx',
   '/batch.xlsx',
   '/icon-192.png',
@@ -27,71 +19,49 @@ const OPTIONAL = [
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js'
 ];
 
-/* ── Install: cache everything but never block on failures ── */
+// ── Install: pre-cache everything ──────────────────────────
 self.addEventListener('install', event => {
+  self.skipWaiting(); // activate immediately — this is what gives auto-updates
   event.waitUntil(
-    caches.open(CACHE_NAME).then(async cache => {
-      /* Core files — try hard */
-      try { await cache.addAll(CORE); } catch(e) { console.warn('SW: core cache failed', e); }
-
-      /* Optional files — cache one by one, ignore failures */
-      for (const url of OPTIONAL) {
-        try { await cache.add(url); } catch(e) { console.warn('SW: skipped', url); }
-      }
-    }).then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then(cache => cache.addAll(PRECACHE))
   );
 });
 
-/* ── Activate: wipe old caches, claim clients immediately ── */
+// ── Activate: wipe old caches ───────────────────────────────
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys()
-      .then(keys => Promise.all(
-        keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
-      ))
-      .then(() => self.clients.claim())
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+    ).then(() => self.clients.claim())
   );
 });
 
-/* ── Fetch strategy ─────────────────────────────────────── */
+// ── Fetch: network-first for HTML & JSON, cache-first for rest ─
 self.addEventListener('fetch', event => {
-  /* Only handle GET requests */
-  if (event.request.method !== 'GET') return;
-
   const url = new URL(event.request.url);
   const isHTMLorJSON = /\.(html|json)$/.test(url.pathname) || url.pathname === '/';
 
   if (isHTMLorJSON) {
-    /* Network-first: always try fresh, fall back to cache */
+    // Network first — always try to get fresh version
     event.respondWith(
-      fetch(event.request, { cache: 'no-cache' })
+      fetch(event.request)
         .then(res => {
-          if (res && res.ok) {
-            const clone = res.clone();
-            caches.open(CACHE_NAME).then(c => c.put(event.request, clone));
-          }
+          const clone = res.clone();
+          caches.open(CACHE_NAME).then(c => c.put(event.request, clone));
           return res;
         })
-        .catch(() => caches.match(event.request)
-          .then(cached => cached || new Response(
-            '<h2 style="font-family:sans-serif;padding:2rem">Offline — please connect and refresh</h2>',
-            { headers: { 'Content-Type': 'text/html' } }
-          ))
-        )
+        .catch(() => caches.match(event.request))
     );
   } else {
-    /* Cache-first: serve from cache instantly, refresh in background */
+    // Cache first — fast for xlsx/JS/icons
     event.respondWith(
       caches.match(event.request).then(cached => {
-        const networkFetch = fetch(event.request).then(res => {
-          if (res && res.ok) {
-            const clone = res.clone();
-            caches.open(CACHE_NAME).then(c => c.put(event.request, clone));
-          }
+        if (cached) return cached;
+        return fetch(event.request).then(res => {
+          const clone = res.clone();
+          caches.open(CACHE_NAME).then(c => c.put(event.request, clone));
           return res;
-        }).catch(() => null);
-
-        return cached || networkFetch;
+        });
       })
     );
   }
