@@ -1153,6 +1153,8 @@
     document.getElementById('modePillOrder').style.display = mode === 'order' ? 'inline-flex' : 'none';
     document.getElementById('cartSection').style.display   = mode === 'order' ? 'block' : 'none';
     resetSearch();
+    // Show all products immediately when screen opens
+    setTimeout(() => renderSuggestions(''), 50);
   }
 
   function goBack() {
@@ -1171,26 +1173,57 @@
       '<mark style="background:#FFE082;padding:0;border-radius:2px;">$1</mark>');
   }
 
+  function highlightWord(text, word) {
+    if (!word) return String(text);
+    const esc = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return String(text).replace(new RegExp('(' + esc + ')', 'gi'),
+      '<mark style="background:#FFE082;padding:0;border-radius:2px;">$1</mark>');
+  }
+
   function filterProducts() {
     const input = document.getElementById('search').value.trim();
+    renderSuggestions(input);
+  }
+
+  function renderSuggestions(input) {
     const container = document.getElementById('suggestions');
     container.innerHTML = '';
-    if (!input) return;
-    const parts = input.toLowerCase().split(/\s+/).filter(Boolean);
-    const brandToken = parts[0] || '', companyToken = parts[1] || '';
-    const matches = stockData.filter(p => {
-      const b = (p.brand || '').toLowerCase(), c = (p.company || '').toLowerCase();
-      if (!b.startsWith(brandToken)) return false;
-      if (companyToken && !c.startsWith(companyToken)) return false;
-      return true;
-    });
-    matches.slice(0, 200).forEach(p => {
+
+    let matches;
+
+    if (!input) {
+      // Show ALL products alphabetically by brand
+      matches = [...stockData].sort((a, b) =>
+        (a.brand || '').localeCompare(b.brand || '')
+      );
+    } else {
+      // Split query into words — every word must appear somewhere in brand+company combined
+      const words = input.toLowerCase().split(/\s+/).filter(Boolean);
+      const combined = stockData.filter(p => {
+        const haystack = ((p.brand || '') + ' ' + (p.company || '')).toLowerCase();
+        return words.every(w => haystack.includes(w));
+      });
+      // Sort: starts-with brand first, then contains
+      const starts = combined.filter(p => (p.brand||'').toLowerCase().startsWith(words[0]));
+      const rest   = combined.filter(p => !(p.brand||'').toLowerCase().startsWith(words[0]));
+      matches = [...starts, ...rest];
+    }
+
+    matches.slice(0, 300).forEach(p => {
       const div = document.createElement('div');
       div.className = 'suggestion-card';
+      // Highlight every search word in brand and company
+      const words = input ? input.toLowerCase().split(/\s+/).filter(Boolean) : [];
+      let hlBrand   = p.brand   || '';
+      let hlCompany = p.company || '';
+      words.forEach(w => {
+        hlBrand   = highlightWord(hlBrand,   w);
+        hlCompany = highlightWord(hlCompany, w);
+      });
       div.innerHTML = `
         <div class="sc-left">
-          <div class="sc-brand">${highlightText(p.brand||'', brandToken)}</div>
-          <div class="sc-company">${highlightText(p.company||'', companyToken)}</div>
+          <div class="sc-brand">${hlBrand}</div>
+          <div class="sc-company">${hlCompany}</div>
           <div class="sc-tags">
             <span class="sc-tag rate">₹${Number(p.rate).toFixed(2)}</span>
             <span class="sc-tag mrp">MRP ₹${Number(p.mrp).toFixed(2)}</span>
