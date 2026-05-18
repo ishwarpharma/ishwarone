@@ -353,8 +353,8 @@
       background: var(--saffron);
     }
     .mode-btn.check {
-      background: #2E7D32;
-      border: none;
+      background: var(--white);
+      border: 1.5px solid var(--border);
     }
 
     .mode-icon { font-size: 1.5rem; line-height: 1; }
@@ -365,13 +365,13 @@
       letter-spacing: 0.02em;
     }
     .mode-btn.order .mode-label { color: white; }
-    .mode-btn.check .mode-label { color: white; }
+    .mode-btn.check .mode-label { color: var(--ink2); }
 
     .mode-sub {
       font-size: 0.65rem;
     }
     .mode-btn.order .mode-sub { color: rgba(255,255,255,0.7); }
-    .mode-btn.check .mode-sub { color: rgba(255,255,255,0.72); }
+    .mode-btn.check .mode-sub { color: var(--ink3); }
 
     /* ════════════════════════════════════════
        SCREEN 2 — SEARCH
@@ -616,73 +616,6 @@
     }
     .cart-remove:hover { background: var(--red); color: white; }
 
-    .cart-edit {
-      width: 30px; height: 30px;
-      border: none;
-      background: var(--blue-lt);
-      color: var(--blue);
-      border-radius: 8px;
-      font-size: 0.75rem;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      padding: 0; margin: 0; width: auto;
-    }
-    .cart-edit:hover { background: var(--blue); color: white; }
-
-    .cart-actions { display: flex; gap: 6px; flex-shrink: 0; }
-
-    /* History & Edit modals share same sheet style as batch */
-    #historyModal, #editModal {
-      display: none;
-      position: fixed; top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5);
-      z-index: 9999;
-      align-items: flex-end;
-      justify-content: center;
-    }
-    #historyModal.open, #editModal.open { display: flex; }
-
-    .hist-item {
-      background: var(--surface);
-      border-radius: 12px;
-      padding: 0.75rem 0.9rem;
-      margin-bottom: 0.6rem;
-    }
-    .hist-item-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 0.4rem;
-    }
-    .hist-party { font-size: 0.88rem; font-weight: 600; color: var(--ink); }
-    .hist-meta  { font-size: 0.7rem; color: var(--ink3); margin-top: 1px; }
-    .hist-actions { display: flex; gap: 6px; flex-shrink: 0; }
-    .hist-btn {
-      font-size: 0.7rem; font-weight: 600;
-      padding: 3px 9px; border-radius: 8px; border: none;
-      cursor: pointer;
-    }
-    .hist-btn.reuse { background: var(--saffron-lt); color: var(--saffron-dark); }
-    .hist-btn.wa    { background: #dcf8c6; color: #128C7E; }
-    .hist-btn.del   { background: var(--red-lt); color: var(--red); }
-    .hist-items-list { font-size: 0.72rem; color: var(--ink2); line-height: 1.6; }
-
-    .hist-header-row {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 0.5rem;
-    }
-    .hist-label {
-      font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
-      letter-spacing: 0.07em; color: var(--ink3);
-    }
-    .hist-clear-btn {
-      font-size: 0.7rem; color: var(--red); background: none;
-      border: none; cursor: pointer; padding: 0; margin: 0; width: auto;
-      font-weight: 600;
-    }
-
     /* Batch modal */
     #batchModal {
       display: none;
@@ -828,13 +761,6 @@
   ══════════════════════════════════════ -->
   <div class="screen" id="mainApp">
 
-    <!-- Tricolour stripe -->
-    <div style="display:flex; height:3px;">
-      <div style="flex:1; background:#FF6F00;"></div>
-      <div style="flex:1; background:#ffffff;"></div>
-      <div style="flex:1; background:#138808;"></div>
-    </div>
-
     <!-- Saffron header -->
     <div class="app-header">
       <div class="app-header-brand">Ishwar Pharma</div>
@@ -844,18 +770,6 @@
           <div class="app-header-date" id="headerDate">—</div>
         </div>
         <div style="display:flex; align-items:center; gap:8px;">
-          <button onclick="openHistory()" title="Order history" style="
-            background: rgba(255,255,255,0.18);
-            border: 1.5px solid rgba(255,255,255,0.35);
-            color: white;
-            border-radius: 10px;
-            padding: 5px 11px;
-            font-size: 0.72rem;
-            font-weight: 600;
-            cursor: pointer;
-            letter-spacing: 0.03em;
-            width: auto; margin: 0;
-          ">🕐 History</button>
           <button onclick="fullReset()" title="New order — clear everything" style="
             background: rgba(255,255,255,0.18);
             border: 1.5px solid rgba(255,255,255,0.35);
@@ -880,12 +794,12 @@
 
         <div class="field-group">
           <label class="field-label">Party Name <span>(required for ordering)</span></label>
-          <input class="field-input" type="text" id="party" placeholder="e.g. Ujs Pharma LLP">
+          <input class="field-input" type="text" id="party" placeholder="e.g. Ramesh Medical Store">
         </div>
 
         <div class="field-group">
           <label class="field-label">Place / District <span>(required for ordering)</span></label>
-          <input class="field-input" type="text" id="place" placeholder="e.g. Mumbai">
+          <input class="field-input" type="text" id="place" placeholder="e.g. Pune">
         </div>
 
         <input type="hidden" id="date">
@@ -1040,62 +954,6 @@
       </div>
       <div class="modal-body">
         <div id="batchContent"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- HISTORY BOTTOM SHEET -->
-  <div id="historyModal">
-    <div class="modal-sheet">
-      <div class="modal-handle"></div>
-      <div class="modal-header">
-        <div class="modal-title">🕐 Order History</div>
-        <button class="modal-close" onclick="closeHistory()">✕</button>
-      </div>
-      <div class="modal-body">
-        <div class="hist-header-row">
-          <span class="hist-label">Last 10 orders</span>
-          <button class="hist-clear-btn" onclick="clearHistory()">Clear all</button>
-        </div>
-        <div id="historyContent"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- CART EDIT BOTTOM SHEET -->
-  <div id="editModal">
-    <div class="modal-sheet">
-      <div class="modal-handle"></div>
-      <div class="modal-header">
-        <div class="modal-title">✏️ Edit Item</div>
-        <button class="modal-close" onclick="closeEditModal()">✕</button>
-      </div>
-      <div class="modal-body">
-        <div id="editProductName" style="font-size:0.95rem; font-weight:700; color:var(--ink); margin-bottom:0.15rem;"></div>
-        <div id="editProductCo"   style="font-size:0.75rem; color:var(--ink3); margin-bottom:1rem;"></div>
-        <div class="entry-grid">
-          <div class="entry-field">
-            <label>Qty</label>
-            <input type="number" inputmode="decimal" id="editQty" placeholder="0">
-          </div>
-          <div class="entry-field">
-            <label>Pack type</label>
-            <select id="editPack">
-              <option value="Units">Units</option>
-              <option value="Box">Box</option>
-              <option value="Case">Case</option>
-            </select>
-          </div>
-          <div class="entry-field">
-            <label>Discount %</label>
-            <input type="number" inputmode="decimal" id="editDisc" placeholder="0">
-          </div>
-          <div class="entry-field">
-            <label>Special Rate</label>
-            <input type="number" inputmode="decimal" id="editSplRate" placeholder="—">
-          </div>
-        </div>
-        <button class="btn btn-saffron" onclick="saveEditItem()" style="margin-top:0.5rem;">✓ Save Changes</button>
       </div>
     </div>
   </div>
@@ -1447,46 +1305,12 @@
           <div class="cart-card-name">${item.brand}</div>
           <div class="cart-card-meta">${item.company} &nbsp;·&nbsp; ${item.qty} ${item.pack||''} &nbsp;·&nbsp; ₹${Number(item.rate).toFixed(2)}${item.splRate ? ' → ₹'+item.splRate : ''} ${item.disc ? '('+item.disc+'% off)' : ''}</div>
         </div>
-        <div class="cart-actions">
-          <button class="cart-edit"   onclick="openEditModal(${i})" title="Edit">✏️</button>
-          <button class="cart-remove" onclick="removeItem(${i})"   title="Remove">✕</button>
-        </div>`;
+        <button class="cart-remove" onclick="removeItem(${i})">✕</button>`;
       c.appendChild(div);
     });
   }
 
   function removeItem(i) { cart.splice(i, 1); renderCart(); }
-
-  /* ── Cart edit modal ── */
-  let editingIndex = -1;
-
-  function openEditModal(i) {
-    editingIndex = i;
-    const item = cart[i];
-    document.getElementById('editProductName').textContent = item.brand;
-    document.getElementById('editProductCo').textContent   = item.company;
-    document.getElementById('editQty').value     = item.qty     || '';
-    document.getElementById('editDisc').value    = item.disc    || '';
-    document.getElementById('editSplRate').value = item.splRate || '';
-    const packSel = document.getElementById('editPack');
-    packSel.value = item.pack || 'Units';
-    document.getElementById('editModal').classList.add('open');
-  }
-
-  function closeEditModal() {
-    document.getElementById('editModal').classList.remove('open');
-    editingIndex = -1;
-  }
-
-  function saveEditItem() {
-    if (editingIndex < 0) return;
-    cart[editingIndex].qty     = document.getElementById('editQty').value;
-    cart[editingIndex].pack    = document.getElementById('editPack').value;
-    cart[editingIndex].disc    = document.getElementById('editDisc').value;
-    cart[editingIndex].splRate = document.getElementById('editSplRate').value;
-    closeEditModal();
-    renderCart();
-  }
 
   function fullReset() {
     // Clear all state
@@ -1599,10 +1423,7 @@
     el.style.display = open ? 'block' : 'none';
     btn.textContent = open ? '✕ Cancel' : '✓ Finalise Order';
     btn.style.background = open ? 'var(--ink3)' : 'var(--saffron)';
-    if (open) {
-      saveToHistory();
-      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
+    if (open) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
   function sendWhatsApp() {
@@ -1627,137 +1448,6 @@
     const conf = document.getElementById('copyConfirm');
     conf.style.display = 'block';
     setTimeout(() => conf.style.display = 'none', 2500);
-  }
-
-  /* ── Order History ── */
-  function getHistoryKey() {
-    return 'ip_history_' + (currentUser ? currentUser.name : 'guest');
-  }
-
-  function saveToHistory() {
-    const party    = document.getElementById('party').value;
-    const place    = document.getElementById('place').value;
-    const salesman = document.getElementById('salesman').value;
-    const date     = document.getElementById('date').value;
-    if (cart.length === 0) return;
-    const record = {
-      id: Date.now(),
-      date, party, place, salesman,
-      items: cart.map(x => ({...x}))
-    };
-    const key = getHistoryKey();
-    let history = [];
-    try { history = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) {}
-    history.unshift(record);
-    if (history.length > 10) history = history.slice(0, 10);
-    localStorage.setItem(key, JSON.stringify(history));
-  }
-
-  function openHistory() {
-    const key = getHistoryKey();
-    let history = [];
-    try { history = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) {}
-    const container = document.getElementById('historyContent');
-    if (history.length === 0) {
-      container.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--ink3);font-size:0.9rem;">No orders yet. Place your first order!</div>';
-    } else {
-      container.innerHTML = '';
-      history.forEach(rec => {
-        const div = document.createElement('div');
-        div.className = 'hist-item';
-        const itemLines = rec.items.map((x,i) =>
-          (i+1) + '. ' + x.brand + ' — ' + x.qty + ' ' + (x.pack||'') +
-          (x.splRate ? ' @ ₹'+x.splRate : ' @ ₹'+Number(x.rate).toFixed(2)) +
-          (x.disc ? ' ('+x.disc+'% off)' : '')
-        ).join('<br>');
-        div.innerHTML = `
-          <div class="hist-item-header">
-            <div>
-              <div class="hist-party">${rec.party || '—'}</div>
-              <div class="hist-meta">${rec.place || ''} &nbsp;·&nbsp; ${rec.date} &nbsp;·&nbsp; ${rec.items.length} item${rec.items.length!==1?'s':''}</div>
-            </div>
-            <div class="hist-actions">
-              <button class="hist-btn reuse" onclick="reuseOrder(${rec.id})">♻ Reuse</button>
-              <button class="hist-btn wa"    onclick="whatsappHistory(${rec.id})">📱 WA</button>
-              <button class="hist-btn del"   onclick="deleteHistory(${rec.id})">✕</button>
-            </div>
-          </div>
-          <div class="hist-items-list">${itemLines}</div>`;
-        container.appendChild(div);
-      });
-    }
-    document.getElementById('historyModal').classList.add('open');
-  }
-
-  function closeHistory() {
-    document.getElementById('historyModal').classList.remove('open');
-  }
-
-  function clearHistory() {
-    if (!confirm('Clear all order history?')) return;
-    localStorage.removeItem(getHistoryKey());
-    openHistory();
-  }
-
-  function deleteHistory(id) {
-    const key = getHistoryKey();
-    let history = [];
-    try { history = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) {}
-    history = history.filter(r => r.id !== id);
-    localStorage.setItem(key, JSON.stringify(history));
-    openHistory();
-  }
-
-  function reuseOrder(id) {
-    const key = getHistoryKey();
-    let history = [];
-    try { history = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) {}
-    const rec = history.find(r => r.id === id);
-    if (!rec) return;
-    closeHistory();
-    // Load party/place and cart from history record
-    document.getElementById('party').value = rec.party || '';
-    document.getElementById('place').value = rec.place || '';
-    cart = rec.items.map(x => ({...x}));
-    renderCart();
-    // Go to order mode
-    appMode = 'order';
-    document.getElementById('appScreen1').classList.remove('active');
-    document.getElementById('appScreen2').classList.add('active');
-    document.getElementById('modePillOrder').style.display = 'inline-flex';
-    document.getElementById('modePillCheck').style.display = 'none';
-    document.getElementById('cartSection').style.display   = 'block';
-    document.getElementById('shareOptions').style.display  = 'none';
-    const fb = document.getElementById('finaliseBtn');
-    if (fb) { fb.textContent = '✓ Finalise Order'; fb.style.background = 'var(--saffron)'; }
-    setTimeout(() => renderSuggestions(''), 50);
-  }
-
-  function whatsappHistory(id) {
-    const key = getHistoryKey();
-    let history = [];
-    try { history = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) {}
-    const rec = history.find(r => r.id === id);
-    if (!rec) return;
-    const dayName = new Date(rec.date).toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'short', year:'numeric' });
-    let msg = '🏪 *ISHWAR PHARMA ORDER*\n';
-    msg += '📅 ' + dayName + '\n';
-    msg += '👤 Salesman: ' + rec.salesman + '\n';
-    msg += '🏬 Party: ' + rec.party + '\n';
-    msg += '📍 Place: ' + rec.place + '\n';
-    msg += '─────────────────────\n';
-    rec.items.forEach((item, i) => {
-      msg += (i+1) + '. *' + item.brand + '*\n';
-      msg += '   ' + item.company + '\n';
-      msg += '   Qty: ' + item.qty + ' ' + (item.pack||'');
-      msg += ' | Rate: ₹' + Number(item.rate).toFixed(2);
-      if (item.splRate) msg += ' → Spl: ₹' + item.splRate;
-      if (item.disc)    msg += ' | Disc: ' + item.disc + '%';
-      msg += '\n';
-    });
-    msg += '─────────────────────\n';
-    msg += 'Total items: ' + rec.items.length;
-    window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
   }
 
   /* ── PDF ── */
@@ -1796,15 +1486,9 @@
     doc.save(`${safeParty}_${safePlace}.pdf`);
   }
 
-  /* ── Tap outside modals to close ── */
+  /* ── Tap outside batch modal to close ── */
   document.getElementById('batchModal').addEventListener('click', function(e) {
     if (e.target === this) closeBatchModal();
-  });
-  document.getElementById('historyModal').addEventListener('click', function(e) {
-    if (e.target === this) closeHistory();
-  });
-  document.getElementById('editModal').addEventListener('click', function(e) {
-    if (e.target === this) closeEditModal();
   });
 
   /* ── Boot ── */
