@@ -353,8 +353,8 @@
       background: var(--saffron);
     }
     .mode-btn.check {
-      background: var(--white);
-      border: 1.5px solid var(--border);
+      background: #2E7D32;
+      border: none;
     }
 
     .mode-icon { font-size: 1.5rem; line-height: 1; }
@@ -365,13 +365,13 @@
       letter-spacing: 0.02em;
     }
     .mode-btn.order .mode-label { color: white; }
-    .mode-btn.check .mode-label { color: var(--ink2); }
+    .mode-btn.check .mode-label { color: white; }
 
     .mode-sub {
       font-size: 0.65rem;
     }
     .mode-btn.order .mode-sub { color: rgba(255,255,255,0.7); }
-    .mode-btn.check .mode-sub { color: var(--ink3); }
+    .mode-btn.check .mode-sub { color: rgba(255,255,255,0.72); }
 
     /* ════════════════════════════════════════
        SCREEN 2 — SEARCH
@@ -761,6 +761,13 @@
   ══════════════════════════════════════ -->
   <div class="screen" id="mainApp">
 
+    <!-- Tricolour stripe -->
+    <div style="display:flex; height:3px;">
+      <div style="flex:1; background:#FF6F00;"></div>
+      <div style="flex:1; background:#ffffff;"></div>
+      <div style="flex:1; background:#138808;"></div>
+    </div>
+
     <!-- Saffron header -->
     <div class="app-header">
       <div class="app-header-brand">Ishwar Pharma</div>
@@ -794,12 +801,12 @@
 
         <div class="field-group">
           <label class="field-label">Party Name <span>(required for ordering)</span></label>
-          <input class="field-input" type="text" id="party" placeholder="e.g. UJS Pharma LLP">
+          <input class="field-input" type="text" id="party" placeholder="e.g. Ramesh Medical Store">
         </div>
 
         <div class="field-group">
           <label class="field-label">Place / District <span>(required for ordering)</span></label>
-          <input class="field-input" type="text" id="place" placeholder="e.g. Mumbai">
+          <input class="field-input" type="text" id="place" placeholder="e.g. Pune">
         </div>
 
         <input type="hidden" id="date">
