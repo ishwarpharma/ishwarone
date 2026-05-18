@@ -38,10 +38,11 @@
 
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-    html, body {
+   html, body {
   height: 100%;
+  padding-top: env(safe-area-inset-top);
 }
-    
+     
     body {
       font-family: -apple-system, 'Segoe UI', Arial, sans-serif;
       background: var(--surface);
