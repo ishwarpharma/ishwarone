@@ -1098,6 +1098,11 @@
   }
 
   async function fetchExcel() {
+    // Show loading indicator while stock loads (important for Android)
+    const container = document.getElementById('suggestions');
+    if (container) {
+      container.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--ink3);font-size:0.9rem;">⏳ Loading products…</div>';
+    }
     try {
       const res = await fetch('stock.xlsx');
       const data = await (await res.blob()).arrayBuffer();
@@ -1111,7 +1116,17 @@
             stockData.push({ brand: row[1], company, rate: row[12], mrp: row[10], stock: row[3] });
         }
       });
-    } catch(e) { console.error('fetchExcel:', e); }
+      // Once stock is ready, auto-render if already on screen 2
+      if (document.getElementById('appScreen2').classList.contains('active')) {
+        const searchVal = document.getElementById('search').value.trim();
+        renderSuggestions(searchVal);
+      }
+    } catch(e) {
+      console.error('fetchExcel:', e);
+      if (container) {
+        container.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--red);font-size:0.9rem;">⚠️ Could not load products. Please check your connection.</div>';
+      }
+    }
   }
 
   async function fetchBatch() {
@@ -1156,8 +1171,11 @@
     document.getElementById('modePillOrder').style.display = mode === 'order' ? 'inline-flex' : 'none';
     document.getElementById('cartSection').style.display   = mode === 'order' ? 'block' : 'none';
     resetSearch();
-    // Show all products immediately when screen opens
-    setTimeout(() => renderSuggestions(''), 50);
+    // If stock is already loaded, render immediately.
+    // If not yet loaded, fetchExcel() will render when it finishes.
+    if (stockData.length > 0) {
+      renderSuggestions('');
+    }
   }
 
   function goBack() {
