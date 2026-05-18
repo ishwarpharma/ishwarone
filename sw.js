@@ -4,7 +4,7 @@
    Cache name bump forces update for all users automatically.
    ============================================================ */
 
-const CACHE_NAME = 'ishwarpharma-v2';
+const CACHE_NAME = 'ishwarpharma-v3';
 const PRECACHE = [
   '/',
   '/index.html',

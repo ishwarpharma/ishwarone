@@ -1093,8 +1093,14 @@
 
   function isCompanyAllowed(company) {
     if (!currentUser) return false;
-    if (currentUser.companies === 'ALL') return true;
-    return currentUser.companies.some(c => company.toLowerCase().includes(c.toLowerCase()));
+    const co = currentUser.companies;
+    // Handle both "ALL" string and ["ALL"] array
+    if (co === 'ALL') return true;
+    if (Array.isArray(co)) {
+      if (co.some(c => c === 'ALL' || c === 'all')) return true;
+      return co.some(c => company.toLowerCase().includes(c.toLowerCase()));
+    }
+    return false;
   }
 
   async function fetchExcel() {
