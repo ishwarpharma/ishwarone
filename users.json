@@ -7,5 +7,8 @@
   { "name": "Anup",           "pin": "17052009", "companies": ["AKUMENTIS", "AKUMENTIS(NET)"] },
   { "name": "Yogesh Singh",   "pin": "18050112", "companies": "ALL" },
   { "name": "Pankaj Kori",    "pin": "18050605", "companies": "ALL" },
-  { "name": "Brijesh",        "pin": "09011979", "companies": "ALL" }
+  { "name": "Rajendra Sakpal",    "pin": "19050550", "companies": "ALL" },
+  { "name": "Pandit Lingade",    "pin": "19050551", "companies": "ALL" },
+  { "name": "Pravin Pawar",    "pin": "19050552", "companies": "ALL" },
+   { "name": "Brijesh",        "pin": "09011979", "companies": "ALL" }
 ]
