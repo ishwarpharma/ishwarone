@@ -8,7 +8,7 @@
   { "name": "Vinayak",        "pin": "18051139", "companies": ["CADILA", "CADILA(NET)"] },
   { "name": "Dipesh Godambe", "pin": "18050117", "companies": ["CSC", "CSC(INJ)"] },
   { "name": "Satyam Singh", "pin": "22050333", "companies": ["CSC", "CSC(INJ)"] },
-  { "name": "Anup",           "pin": "17052009", "companies": ["AKUMENTIS", "AKUMENTIS(NET)"] },
+  { "name": "Anup",           "pin": "17052009", "companies": ["AKUMENTIS"] },
   { "name": "Zydus Kuldeep",           "pin": "16070756", "companies": ["ZYDUS"] },
   { "name": "Zuventus Team",           "pin": "16070758", "companies": ["ZUVENTUS"] }, 
   { "name": "Yogesh Singh",   "pin": "18050112", "companies": "ALL" },
