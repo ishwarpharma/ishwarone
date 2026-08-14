@@ -1116,7 +1116,7 @@
       const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
       stockData = [];
       json.forEach(row => {
-        if (row[1] && row[13] && row[12] && row[10]) {
+        if (row[1] && row[13] && row[12] !== undefined && row[12] !== '' && row[10] !== undefined && row[10] !== '') {
           const company = String(row[13] || '');
           if (isCompanyAllowed(company))
             stockData.push({ brand: row[1], company, rate: row[12], mrp: row[10], stock: row[3] });
