@@ -1,6 +1,6 @@
 [
-  { "name": "Umesh",          "pin": "18051133", "companies": ["ALKEM(.CHRONIC)", "ALKEM(.MAXX)"] },
-  { "name": "Prajjwal",       "pin": "18051129", "companies": ["ALKEM(.CHRONIC)", "ALKEM(.MAXX)"] },
+  { "name": "Umesh",          "pin": "18051133", "companies": ["ALKEM(.ALDINE), ALKEM(.CHRONIC)", "ALKEM(.MAXX)"] },
+  { "name": "Prajjwal",       "pin": "18051129", "companies": ["ALKEM(.ALDINE), ALKEM(.CHRONIC)", "ALKEM(.MAXX)"] },
   { "name": "Roshan Pandey",  "pin": "20050401", "companies": ["ALKEM( HC)"] },
   { "name": "Arun Dube",  "pin": "20050410", "companies": ["ALKEM( HC)"] },
  { "name": "Rajesh Sukhla",  "pin": "29050603", "companies": ["ALKEM( HC)"] },
